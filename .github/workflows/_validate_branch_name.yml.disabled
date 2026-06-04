@@ -1,0 +1,31 @@
+name: validate branch name
+
+on:
+  workflow_call:
+
+jobs:
+  validate-branch-name:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Determine branch name
+        id: vars
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "branch=${{ github.head_ref }}" >> $GITHUB_OUTPUT
+          else
+            echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+
+      - name: Validate branch name starts with JIRA ticket
+        run: |
+          BRANCH="${{ steps.vars.outputs.branch }}"
+          echo "Checking branch: $BRANCH"
+          if [ -z "$BRANCH" ]; then
+            echo "::error ::Could not determine branch name."
+            exit 1
+          fi
+          if ! echo "$BRANCH" | grep -Eq '^[A-Z]+-[0-9]+'; then
+            echo "::error ::Branch name must start with a JIRA ticket key (e.g. PROJ-123)."
+            exit 1
+          fi
