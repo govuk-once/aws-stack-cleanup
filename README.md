@@ -20,6 +20,7 @@ It is recommened to move any existing repos to a new one created from this templ
 - a temporary OIDC Stack that creates components to enable deployments from GitHub Actions
 
 ## Local Development Setup:
+aws codeartifact login --tool npm --repository registry-prod-repo --domain registry-prod --domain-owner 904690835784 --region eu-west-2
 
 ### install/setup locally: (to be done once)
 - install nvm (https://github.com/nvm-sh/nvm or brew)
