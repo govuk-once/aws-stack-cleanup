@@ -1,5 +1,4 @@
 import * as cdk from 'aws-cdk-lib';
-import * as iam from 'aws-cdk-lib/aws-iam';
 import * as path from 'path';
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
@@ -10,7 +9,6 @@ import { isEphemeralEnvironment } from '../constants/environment';
 import { INamingProvider } from 'once-platform-constructs/namingProviders';
 import { ServiceEnvironmentNamingProvider } from 'once-platform-constructs/namingProviders';
 import { LambdaFactory } from '../cdk_constructs/LambdaFactory';
-import { ServiceParameters } from 'once-platform-constructs';
 //import { RoleHelper, CrudOperations } from 'once-platform-constructs';
 import { RoleHelper, Operations } from '../cdk_constructs/RoleHelper';
 import { KmsKeyFactory } from '../cdk_constructs/KmsKeyFactory';
@@ -47,9 +45,6 @@ export class AutoStackCleanupStack extends cdk.Stack {
     cdk.Tags.of(this).add('Environment', props.environment);
     cdk.Tags.of(this).add('Retain', 'true');
 
-    // retrieve parameters from SSM Parameter Store
-
-    const serviceParameters = new ServiceParameters(this);
     const kmsKeyFactory = new KmsKeyFactory(this, props.serviceName);
     const lambdaFactory = new LambdaFactory(this, props.serviceName);
     const roleHelper = new RoleHelper(this, props.serviceName);
@@ -85,6 +80,9 @@ export class AutoStackCleanupStack extends cdk.Stack {
         enableEncryption: true,
         retentionPeriod: cdk.Duration.days(1),
         visibiltyTimeout: cdk.Duration.days(1),
+        enableQueueTrigger: true,
+        batchSize: 10,
+        maxBatchingWindow: cdk.Duration.minutes(4),
         scope: this,
         namingProvider: this.namingProvider,
       },
@@ -99,7 +97,7 @@ export class AutoStackCleanupStack extends cdk.Stack {
       namingProvider: this.namingProvider,
     });
 
-    const detectStaleStackFunction = lambdaFactory.createScheduledLambda(
+    const detectStaleStacksFunction = lambdaFactory.createScheduledLambda(
       'staleStackLambda',
       {
         cronName: 'staleStackRunner',
@@ -124,14 +122,14 @@ export class AutoStackCleanupStack extends cdk.Stack {
 
     roleHelper.addSQSOperationPermissionsToLambda({
       id: 'sqsPublishing',
-      lambda: detectStaleStackFunction.lambda,
+      lambda: detectStaleStacksFunction.lambda,
       queue: staleStackDeletionFunction.queue,
       operations: [Operations.UPDATE],
       scope: this,
       namingProvider: this.namingProvider,
     });
 
-    lambdaFactory.addEnvironmentVariables(detectStaleStackFunction.lambda, [
+    lambdaFactory.addEnvironmentVariables(detectStaleStacksFunction.lambda, [
       {
         name: 'roleToAssume',
         value: 'stackCleanupRole',

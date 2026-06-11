@@ -8,6 +8,7 @@ import * as logs from 'aws-cdk-lib/aws-logs';
 import * as events from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
 import * as kms from 'aws-cdk-lib/aws-kms';
+import * as lambdaEventSources from 'aws-cdk-lib/aws-lambda-event-sources';
 import { INamingProvider } from 'once-platform-constructs/namingProviders';
 import { ServiceEnvironmentNamingProvider } from 'once-platform-constructs/namingProviders';
 
@@ -43,6 +44,9 @@ export interface ISqsLambdaProps extends ILambdaProperties {
   fifo?: boolean;
   enableEncryption: boolean;
   encryptionKey?: kms.IKey;
+  enableQueueTrigger?: boolean;
+  batchSize?: number;
+  maxBatchingWindow?: cdk.Duration;
 
   // delete this once the construct library exposes it
   scope: Construct;
@@ -104,6 +108,16 @@ export class LambdaFactory extends lambdaFactory {
             } : {}),
       },
     );
+
+    if(props.enableQueueTrigger ?? true){
+        lambda.addEventSource(
+            new lambdaEventSources.SqsEventSource(queue,{
+                batchSize: props.batchSize ?? 10,
+                maxBatchingWindow: props.maxBatchingWindow,
+                reportBatchItemFailures: true
+            }),
+        );
+    }
 
     return {
       lambda,
