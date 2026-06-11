@@ -64,7 +64,7 @@ export class AutoStackCleanupStack extends cdk.Stack {
 
     roleHelper.addToResourcePolicyTokmsKey(this, logKey.key);
 
-    const staleStackCleanupFunction = lambdaFactory.createSQSTriggeredLambda(
+    const staleStackDeletionFunction = lambdaFactory.createSQSTriggeredLambda(
       'staleStackCleanupLambda',
       {
         queueName: 'staleStackCleanup',
@@ -92,14 +92,14 @@ export class AutoStackCleanupStack extends cdk.Stack {
 
     roleHelper.addSQSOperationPermissionsToLambda({
       id: 'sqsReading',
-      lambda: staleStackCleanupFunction.lambda,
-      queue: staleStackCleanupFunction.queue,
+      lambda: staleStackDeletionFunction.lambda,
+      queue: staleStackDeletionFunction.queue,
       operations: [Operations.UPDATE, Operations.READ],
       scope: this,
       namingProvider: this.namingProvider,
     });
 
-    const staleStackFunction = lambdaFactory.createScheduledLambda(
+    const detectStaleStackFunction = lambdaFactory.createScheduledLambda(
       'staleStackLambda',
       {
         cronName: 'staleStackRunner',
@@ -124,25 +124,33 @@ export class AutoStackCleanupStack extends cdk.Stack {
 
     roleHelper.addSQSOperationPermissionsToLambda({
       id: 'sqsPublishing',
-      lambda: staleStackFunction.lambda,
-      queue: staleStackCleanupFunction.queue,
+      lambda: detectStaleStackFunction.lambda,
+      queue: staleStackDeletionFunction.queue,
       operations: [Operations.UPDATE],
       scope: this,
       namingProvider: this.namingProvider,
     });
 
-    lambdaFactory.addEnvironmentVariables(staleStackFunction.lambda, [
+    lambdaFactory.addEnvironmentVariables(detectStaleStackFunction.lambda, [
+      {
+        name: 'roleToAssume',
+        value: 'stackCleanupRole',
+      },
+      {
+        name: 'staleAfterDays',
+        value: '60',
+      },
       {
         name: 'queueArn',
-        value: `${staleStackCleanupFunction.queue.queueArn}`,
+        value: `${staleStackDeletionFunction.queue.queueArn}`,
       },
       {
         name: 'queueName',
-        value: `${staleStackCleanupFunction.queue.queueName}`,
+        value: `${staleStackDeletionFunction.queue.queueName}`,
       },
       {
         name: 'queueUrl',
-        value: `${staleStackCleanupFunction.queue.queueUrl}`,
+        value: `${staleStackDeletionFunction.queue.queueUrl}`,
       },
     ]);
   }
