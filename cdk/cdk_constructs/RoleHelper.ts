@@ -6,6 +6,8 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
 import { INamingProvider } from 'once-platform-constructs/namingProviders';
+import { IKey } from 'aws-cdk-lib/aws-kms';
+import { Stack } from 'aws-cdk-lib';
 
 export enum Operations {
   CREATE = 'CREATE',
@@ -32,7 +34,26 @@ export interface IRoleHelperProps  {
 
 export class RoleHelper extends roleHelper{
 
-      public addSQSOperationPermissionsToLambda(
+    public addToResourcePolicyTokmsKey(scope: Construct, key: IKey){
+
+        key.addToResourcePolicy(
+              new iam.PolicyStatement({
+                principals: [
+                  new iam.ServicePrincipal(`logs.${Stack.of(scope).region}.amazonaws.com`),
+                ],
+                actions: [
+                  'kms:Encrypt',
+                  'kms:Decrypt',
+                  'kms:ReEncrypt*',
+                  'kms:GenerateDataKey*',
+                  'kms:DescribeKey',
+                ],
+                resources: ['*'],
+              }),
+            );
+    }
+
+public addSQSOperationPermissionsToLambda(
     props: IRoleHelperProps,
   ): iam.Role {
     if (!props.queue) throw 'queue must be supplied to add sqs roles to lambda';

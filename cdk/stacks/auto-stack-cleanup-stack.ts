@@ -13,7 +13,7 @@ import { LambdaFactory } from '../cdk_constructs/LambdaFactory';
 import { ServiceParameters } from 'once-platform-constructs';
 //import { RoleHelper, CrudOperations } from 'once-platform-constructs';
 import { RoleHelper, Operations } from '../cdk_constructs/RoleHelper';
-import { SqsQueue } from 'aws-cdk-lib/aws-events-targets';
+import { KmsKeyFactory } from '../cdk_constructs/KmsKeyFactory';
 
 interface GovUkOnceStackProps extends cdk.StackProps {
   serviceName: string;
@@ -50,32 +50,19 @@ export class AutoStackCleanupStack extends cdk.Stack {
     // retrieve parameters from SSM Parameter Store
 
     const serviceParameters = new ServiceParameters(this);
+    const kmsKeyFactory = new KmsKeyFactory(this, props.serviceName);
+    const lambdaFactory = new LambdaFactory(this, props.serviceName);
+    const roleHelper = new RoleHelper(this, props.serviceName);
 
-    const logKey = new cdk.aws_kms.Key(this, 'logkey', {
-      alias: `${this.namingProvider.getResourceName('logkey')}`,
-      enableKeyRotation: true,
+    const logKey = kmsKeyFactory.createKey('logkey', {
+      alias: 'logkey',
+      enabedKeyRotation: true,
       removalPolicy: isEphemeralEnvironment()
         ? cdk.RemovalPolicy.DESTROY
         : cdk.RemovalPolicy.RETAIN,
     });
 
-    logKey.addToResourcePolicy(
-      new iam.PolicyStatement({
-        principals: [
-          new iam.ServicePrincipal(`logs.${this.region}.amazonaws.com`),
-        ],
-        actions: [
-          'kms:Encrypt',
-          'kms:Decrypt',
-          'kms:ReEncrypt*',
-          'kms:GenerateDataKey*',
-          'kms:DescribeKey',
-        ],
-        resources: ['*'],
-      }),
-    );
-    const lambdaFactory = new LambdaFactory(this, props.serviceName);
-    const roleHelper = new RoleHelper(this, props.serviceName);
+    roleHelper.addToResourcePolicyTokmsKey(this, logKey.key);
 
     const staleStackCleanupFunction = lambdaFactory.createSQSTriggeredLambda(
       'staleStackCleanupLambda',
@@ -86,7 +73,7 @@ export class AutoStackCleanupStack extends cdk.Stack {
         ),
         description: 'Get data from the database using the supplied id',
         duration: 10,
-        key: logKey,
+        key: logKey.key,
         handler: 'index.handler',
         memorySize: 128,
         methods: ['get'],
@@ -95,9 +82,22 @@ export class AutoStackCleanupStack extends cdk.Stack {
         retentionDays: logs.RetentionDays.FOUR_MONTHS,
         runtime: cdk.aws_lambda.Runtime.NODEJS_LATEST,
         skipCheckovRule: 'CKV_AWS_59',
+        enableEncryption: true,
+        retentionPeriod: cdk.Duration.days(1),
+        visibiltyTimeout: cdk.Duration.days(1),
         scope: this,
+        namingProvider: this.namingProvider,
       },
     );
+
+    roleHelper.addSQSOperationPermissionsToLambda({
+      id: 'sqsReading',
+      lambda: staleStackCleanupFunction.lambda,
+      queue: staleStackCleanupFunction.queue,
+      operations: [Operations.UPDATE, Operations.READ],
+      scope: this,
+      namingProvider: this.namingProvider,
+    });
 
     const staleStackFunction = lambdaFactory.createScheduledLambda(
       'staleStackLambda',
@@ -108,7 +108,7 @@ export class AutoStackCleanupStack extends cdk.Stack {
         ),
         description: 'Get data from the database using the supplied id',
         duration: 10,
-        key: logKey,
+        key: logKey.key,
         handler: 'index.handler',
         memorySize: 128,
         methods: ['get'],
@@ -131,148 +131,19 @@ export class AutoStackCleanupStack extends cdk.Stack {
       namingProvider: this.namingProvider,
     });
 
-    const writeFuntion = lambdaFactory.createLambdaWithApiRoute(
-      'writeDataLambda',
+    lambdaFactory.addEnvironmentVariables(staleStackFunction.lambda, [
       {
-        code: lambda.Code.fromAsset(
-          path.join(__dirname, '../../dist/writeLambda'),
-        ),
-        description: 'Writes data from the database using the supplied id',
-        duration: 10,
-        key: logKey,
-        handler: 'index.handler',
-        memorySize: 128,
-        methods: ['post'],
-        name: 'writeData',
-        path: '/customers/{customerId}/{dataType}',
-        retentionDays: logs.RetentionDays.ONE_WEEK,
-        runtime: cdk.aws_lambda.Runtime.NODEJS_LATEST,
-        skipCheckovRule: 'CKV_AWS_59',
+        name: 'queueArn',
+        value: `${staleStackCleanupFunction.queue.queueArn}`,
       },
-    );
-
-    lambdaFactory.addEnvironmentVariable(writeFuntion.lambda, {
-      name: 'tableName',
-      value: `${table.tableName}`,
-    });
-
-    roleHelper.addDynamoOperationPermissionsToLambda({
-      id: 'lamdbaWrite',
-      lambda: writeFuntion.lambda,
-      table: table,
-      operations: [CrudOperations.CREATE, CrudOperations.UPDATE],
-    });
-
-    const deleteFuntion = lambdaFactory.createLambdaWithApiRoute(
-      'deleteDataLambda',
       {
-        code: lambda.Code.fromAsset(
-          path.join(__dirname, '../../dist/deleteLambda'),
-        ),
-        description: 'Deletes data from the database using the supplied id',
-        duration: 10,
-        key: logKey,
-        handler: 'index.handler',
-        memorySize: 128,
-        methods: ['delete'],
-        name: 'deleteData',
-        path: '/customers/{customerId}/{dataType}',
-        retentionDays: logs.RetentionDays.ONE_WEEK,
-        runtime: cdk.aws_lambda.Runtime.NODEJS_LATEST,
-        skipCheckovRule: 'CKV_AWS_59',
+        name: 'queueName',
+        value: `${staleStackCleanupFunction.queue.queueName}`,
       },
-    );
-
-    lambdaFactory.addEnvironmentVariable(deleteFuntion.lambda, {
-      name: 'tableName',
-      value: `${table.tableName}`,
-    });
-
-    roleHelper.addDynamoOperationPermissionsToLambda({
-      id: 'lamdbaDelete',
-      lambda: deleteFuntion.lambda,
-      table: table,
-      operations: [CrudOperations.DELETE],
-    });
-
-    const pythonDeleteFuntion = lambdaFactory.createLambdaWithApiRoute(
-      'pythonDeleteDataLambda',
       {
-        code: lambda.Code.fromAsset(
-          path.join(__dirname, '../../dist/pythonDeleteLambda'),
-        ),
-        description: 'Deletes data from the database using the supplied id',
-        duration: 10,
-        key: logKey,
-        handler: 'index.handler',
-        memorySize: 128,
-        methods: ['delete'],
-        name: 'pythonDeleteData',
-        path: '/customers/p/{customerId}/{dataType}',
-        retentionDays: logs.RetentionDays.ONE_WEEK,
-        runtime: cdk.aws_lambda.Runtime.PYTHON_3_12,
-        skipCheckovRule: 'CKV_AWS_59',
+        name: 'queueUrl',
+        value: `${staleStackCleanupFunction.queue.queueUrl}`,
       },
-    );
-
-    lambdaFactory.addEnvironmentVariable(pythonDeleteFuntion.lambda, {
-      name: 'tableName',
-      value: `${table.tableName}`,
-    });
-
-    roleHelper.addDynamoOperationPermissionsToLambda({
-      id: 'pythonlamdbaDelete',
-      lambda: pythonDeleteFuntion.lambda,
-      table: table,
-      operations: [CrudOperations.DELETE],
-    });
-
-    const api = apiFactory.createApiGatewayRouter('dataManagementapi', {
-      cacheDurationSeconds: 1,
-      description: 'Allows for data storage and management',
-      key: logKey,
-      name: 'dataManagementapi',
-      domainName: {
-        domainName: `${this.namingProvider.getPreFix()}.${serviceParameters.zone().zoneName}`,
-        certificate: serviceParameters.certificate(),
-      },
-    });
-
-    apiFactory.addRoutes(
-      [getFuntion, writeFuntion, deleteFuntion, pythonDeleteFuntion],
-      api,
-    );
-
-    const dashBoard = dashBoardFactory.createDashboard('dataStoreDashboard', {
-      name: 'dataStoreDashboard',
-      restApis: [api],
-      lambdas: [
-        getFuntion.lambda,
-        writeFuntion.lambda,
-        deleteFuntion.lambda,
-        pythonDeleteFuntion.lambda,
-      ],
-      tables: [table],
-    });
-
-    // Example new DNS record for API Gateway
-    new cdk.aws_route53.ARecord(this, 'ApiAliasRecord', {
-      zone: serviceParameters.zone(),
-      recordName: `${this.namingProvider.getPreFix()}`,
-      target: cdk.aws_route53.RecordTarget.fromAlias(
-        new cdk.aws_route53_targets.ApiGateway(api),
-      ),
-    });
-
-    // Output the API URL
-    new cdk.CfnOutput(this, 'ApiUrl', {
-      value: `https://${this.namingProvider.getPreFix()}.${serviceParameters.zone().zoneName}`,
-      description: 'API Gateway URL',
-    });
-
-    new cdk.CfnOutput(this, 'Dashboard', {
-      value: dashBoard.dashboardName,
-      description: 'System dashboard',
-    });
+    ]);
   }
 }

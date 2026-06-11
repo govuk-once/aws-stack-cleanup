@@ -1,4 +1,5 @@
 import { LambdaFactory as lambdaFactory } from 'once-platform-constructs';
+import { KmsKeyFactory } from './KmsKeyFactory';
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
@@ -6,6 +7,9 @@ import * as sqs from 'aws-cdk-lib/aws-sqs';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import * as events from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
+import * as kms from 'aws-cdk-lib/aws-kms';
+import { INamingProvider } from 'once-platform-constructs/namingProviders';
+import { ServiceEnvironmentNamingProvider } from 'once-platform-constructs/namingProviders';
 
 export interface ILambdaProperties extends lambda.FunctionProps {
   duration: number;
@@ -34,8 +38,15 @@ export interface IScheduledLambdaProps extends ILambdaProperties {
 
 export interface ISqsLambdaProps extends ILambdaProperties {
   queueName: string;
+  visibiltyTimeout: cdk.Duration;
+  retentionPeriod: cdk.Duration;
+  fifo?: boolean;
+  enableEncryption: boolean;
+  encryptionKey?: kms.IKey;
+
   // delete this once the construct library exposes it
   scope: Construct;
+  namingProvider: INamingProvider;
 }
 
 export interface IScheduledLambda {
@@ -49,12 +60,50 @@ export interface ISqsProcessingLambda {
 }
 
 export class LambdaFactory extends lambdaFactory {
+  kmsKeyFactory: KmsKeyFactory;
+  namingProvider1: INamingProvider ;
+
+  constructor(
+    private readonly scope1: Construct,
+    serviceName: string,
+    namingProvider?: INamingProvider,
+  ) {
+    super(scope1, serviceName, namingProvider);
+
+    this.namingProvider1= namingProvider ?? new ServiceEnvironmentNamingProvider(serviceName);
+    this.kmsKeyFactory = new KmsKeyFactory(scope1, serviceName, namingProvider1);
+  }
+
   public createSQSTriggeredLambda(
     id: string,
     props: ISqsLambdaProps,
   ): ISqsProcessingLambda {
     const lambda = this.createLambda(id, props);
-    const queue = new sqs.Queue(props.scope, id, {});
+
+    let key: kms.IKey | undefined;
+
+    if (props.enableEncryption) {
+      key = props.encryptionKey ?? this.kmsKeyFactory.createKey(id,{
+        alias: `${props.queueName}-key`,
+        description: 'KMS Key to secure the queue';
+      }).key;
+    }
+
+    const queue = new sqs.Queue(
+      props.scope,
+      props.namingProvider.getResourceName(id),
+      {
+        queueName: props.queueName,
+        visibilityTimeout: props.visibiltyTimeout,
+        retentionPeriod: props.retentionPeriod,
+        fifo: props.fifo ?? false,
+        ...(props.enableEncryption && key ?
+            {
+                encryption: sqs.QueueEncryption.KMS,
+                encryptionMasterKey: key
+            } : {}),
+      },
+    );
 
     return {
       lambda,
