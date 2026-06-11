@@ -93,12 +93,13 @@ export class LambdaFactory extends lambdaFactory {
       }).key;
     }
 
+
     const queue = new sqs.Queue(
       props.scope,
       props.namingProvider.getResourceName(id),
       {
         queueName: props.queueName,
-        visibilityTimeout: props.visibiltyTimeout,
+        visibilityTimeout: cdk.Duration.seconds(props.visibiltyTimeout.toSeconds() > props.duration * 6 ? props.visibiltyTimeout.toSeconds() : props.duration * 6),
         retentionPeriod: props.retentionPeriod,
         fifo: props.fifo ?? false,
         ...(props.enableEncryption && key ?
@@ -117,6 +118,7 @@ export class LambdaFactory extends lambdaFactory {
                 reportBatchItemFailures: true
             }),
         );
+        queue.grantConsumeMessages(lambda);
     }
 
     return {
