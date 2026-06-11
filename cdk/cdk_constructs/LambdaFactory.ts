@@ -82,7 +82,7 @@ export class LambdaFactory extends lambdaFactory {
     id: string,
     props: ISqsLambdaProps,
   ): ISqsProcessingLambda {
-    const lambda = this.createLambda(id, props);
+    const lambdaFunction = this.createLambda(id, props);
 
     let key: kms.IKey | undefined;
 
@@ -111,18 +111,18 @@ export class LambdaFactory extends lambdaFactory {
     );
 
     if(props.enableQueueTrigger ?? true){
-        lambda.addEventSource(
+        lambdaFunction.addEventSource(
             new lambdaEventSources.SqsEventSource(queue,{
                 batchSize: props.batchSize ?? 10,
                 maxBatchingWindow: props.maxBatchingWindow,
                 reportBatchItemFailures: true
             }),
         );
-        queue.grantConsumeMessages(lambda);
+        queue.grantConsumeMessages(lambdaFunction);
     }
 
     return {
-      lambda,
+      lambda: lambdaFunction,
       queue,
     };
   }
@@ -137,7 +137,7 @@ export class LambdaFactory extends lambdaFactory {
       );
     }
 
-    const lambda = this.createLambda(id, props);
+    const lambdaFunction = this.createLambda(id, props);
     const rules: events.Rule[] = [];
 
     if (props.interval) {
@@ -146,7 +146,7 @@ export class LambdaFactory extends lambdaFactory {
         schedule: events.Schedule.rate(props.interval),
       });
 
-      rule.addTarget(new targets.LambdaFunction(lambda));
+      rule.addTarget(new targets.LambdaFunction(lambdaFunction));
       rules.push(rule);
     }
 
@@ -165,10 +165,13 @@ export class LambdaFactory extends lambdaFactory {
           }),
         },
       );
+      
+      rule.addTarget(new targets.LambdaFunction(lambdaFunction));
+      rules.push(rule);
     });
 
     return {
-      lambda,
+      lambda: lambdaFunction,
       rules,
     };
   }
