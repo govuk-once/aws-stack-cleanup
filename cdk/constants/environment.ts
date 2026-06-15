@@ -8,7 +8,7 @@ export enum GovUkOnceEnvironments {
 
 // define service metadata
 export const serviceMetadata = {
-  serviceName: 'auto-stack-cleanup',
+  serviceName: 'asc',
   teamName: 'platform-team',
   repositoryUrl: 'https://github.com/govuk-once/example-service',
   version: '0.1.0',

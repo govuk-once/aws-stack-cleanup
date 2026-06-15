@@ -90,7 +90,7 @@ export class LambdaFactory extends lambdaFactory {
     if (props.enableEncryption) {
       key =
         props.encryptionKey ??
-        this.kmsKeyFactory.createKey(id, {
+        this.kmsKeyFactory.createKey(`${id}-LambdalogKey`, {
           alias: `${props.queueName}-key`,
           description: 'KMS Key to secure the queue',
         }).key;

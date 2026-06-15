@@ -1,5 +1,6 @@
 import { Construct } from 'constructs';
 import { INamingProvider } from 'once-platform-constructs/namingProviders';
+import { FactoryBase } from './FactoryBase';
 import * as cdk from 'aws-cdk-lib';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as kms from 'aws-cdk-lib/aws-kms';
@@ -17,41 +18,31 @@ export interface IKmsKey {
   alias: kms.Alias;
 }
 
-export class KmsKeyFactory {
-  namingProvider: INamingProvider | undefined;
-
+export class KmsKeyFactory extends FactoryBase {
   constructor(
     protected readonly scope: Construct,
     serviceName: string,
     namingProvider?: INamingProvider,
   ) {
-    this.namingProvider = namingProvider;
+    super(serviceName, namingProvider);
   }
 
   public createKey(id: string, props: IKmsKeyProps): IKmsKey {
-    const key = new kms.Key(
-      this.scope,
-      `${this.namingProvider?.getResourceId(id)}`,
-      {
-        description: props.description,
-        enableKeyRotation: props.enabedKeyRotation,
-        removalPolicy: props.removalPolicy ?? cdk.RemovalPolicy.RETAIN,
-        admins: props.admins,
-      },
-    );
+    const key = new kms.Key(this.scope, `${this.getResourceId(id)}`, {
+      description: props.description,
+      enableKeyRotation: props.enabedKeyRotation,
+      removalPolicy: props.removalPolicy ?? cdk.RemovalPolicy.RETAIN,
+      admins: props.admins,
+    });
 
     const aliasName = props.alias.startsWith('alias/')
       ? props.alias
       : `alias/${props.alias}`;
 
-    const alias = new kms.Alias(
-      this.scope,
-      `${this.namingProvider?.getResourceId(`alias`)}`,
-      {
-        aliasName,
-        targetKey: key,
-      },
-    );
+    const alias = new kms.Alias(this.scope, `${id}-alias`, {
+      aliasName,
+      targetKey: key,
+    });
 
     return { key, alias };
   }

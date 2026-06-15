@@ -71,7 +71,7 @@ export class AutoStackCleanupStack extends cdk.Stack {
     roleHelper.addToResourcePolicyTokmsKey(this, logKey.key);
 
     const staleStackDeletionFunction = lambdaFactory.createSQSTriggeredLambda(
-      'staleStackCleanupLambda',
+      'StackCleanupLambda',
       {
         queueName: appConfig.queueName,
         code: lambda.Code.fromAsset(
@@ -90,7 +90,9 @@ export class AutoStackCleanupStack extends cdk.Stack {
         skipCheckovRule: 'CKV_AWS_59',
         enableEncryption: true,
         retentionPeriod: cdk.Duration.days(appConfig.retentionPeriod),
-        visibiltyTimeout: cdk.Duration.days(appConfig.visibiltyTimeout),
+        visibiltyTimeout: cdk.Duration.seconds(
+          appConfig.visibiltyTimeoutSeconds,
+        ),
         enableQueueTrigger: true,
         batchSize: appConfig.batchSize,
         maxBatchingWindow: cdk.Duration.minutes(appConfig.maxBatchingWindow),
@@ -109,7 +111,7 @@ export class AutoStackCleanupStack extends cdk.Stack {
     });
 
     const detectStaleStacksFunction = lambdaFactory.createScheduledLambda(
-      'staleStackLambda',
+      'stackDetectionLambda',
       {
         cronName: 'staleStackRunner',
         code: lambda.Code.fromAsset(

@@ -14,11 +14,11 @@ export const appConfig = {
 
   notificationEmails: ['phill.armstrong@digital.cabinet-office.gov.uk'],
 
-  queueName: 'staleStackCleanup',
+  queueName: 'StackCleanup',
   batchSize: 1,
   maxBatchingWindow: 1,
   retentionPeriod: 1,
-  visibiltyTimeout: 1,
+  visibiltyTimeoutSeconds: 3600,
 };
 
 export const appVariables = {
