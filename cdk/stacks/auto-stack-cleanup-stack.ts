@@ -5,6 +5,7 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as logs from 'aws-cdk-lib/aws-logs';
 
 import { isEphemeralEnvironment } from '../constants/environment';
+import { appConfig, appVariables } from '../constants/appConfig';
 
 import { INamingProvider } from 'once-platform-constructs/namingProviders';
 import { ServiceEnvironmentNamingProvider } from 'once-platform-constructs/namingProviders';
@@ -12,6 +13,7 @@ import { LambdaFactory } from '../cdk_constructs/LambdaFactory';
 //import { RoleHelper, CrudOperations } from 'once-platform-constructs';
 import { RoleHelper, Operations } from '../cdk_constructs/RoleHelper';
 import { KmsKeyFactory } from '../cdk_constructs/KmsKeyFactory';
+import { SnsProviderFactory } from '../cdk_constructs/SnsProviderFactory';
 
 interface GovUkOnceStackProps extends cdk.StackProps {
   serviceName: string;
@@ -48,6 +50,11 @@ export class AutoStackCleanupStack extends cdk.Stack {
     const kmsKeyFactory = new KmsKeyFactory(this, props.serviceName);
     const lambdaFactory = new LambdaFactory(this, props.serviceName);
     const roleHelper = new RoleHelper(this, props.serviceName);
+    const snsProviderFactory = new SnsProviderFactory(
+      this,
+      props.serviceName,
+      kmsKeyFactory,
+    );
 
     const logKey = kmsKeyFactory.createKey('logkey', {
       alias: 'logkey',
@@ -62,27 +69,27 @@ export class AutoStackCleanupStack extends cdk.Stack {
     const staleStackDeletionFunction = lambdaFactory.createSQSTriggeredLambda(
       'staleStackCleanupLambda',
       {
-        queueName: 'staleStackCleanup',
+        queueName: appConfig.queueName,
         code: lambda.Code.fromAsset(
           path.join(__dirname, '../../dist/readLambda'),
         ),
         description: 'Get data from the database using the supplied id',
-        duration: 10,
+        duration: appConfig.LambdaMaxDuration,
         key: logKey.key,
         handler: 'index.handler',
         memorySize: 128,
         methods: ['get'],
-        name: 'getData',
+        name: 'cleanupStacks',
         path: '/customers/{customerId}/{dataType}',
-        retentionDays: logs.RetentionDays.FOUR_MONTHS,
+        retentionDays: appConfig.logRetentionDuration,
         runtime: cdk.aws_lambda.Runtime.NODEJS_LATEST,
         skipCheckovRule: 'CKV_AWS_59',
         enableEncryption: true,
-        retentionPeriod: cdk.Duration.days(1),
-        visibiltyTimeout: cdk.Duration.days(1),
+        retentionPeriod: cdk.Duration.days(appConfig.retentionPeriod),
+        visibiltyTimeout: cdk.Duration.days(appConfig.visibiltyTimeout),
         enableQueueTrigger: true,
-        batchSize: 10,
-        maxBatchingWindow: cdk.Duration.minutes(4),
+        batchSize: appConfig.batchSize,
+        maxBatchingWindow: cdk.Duration.minutes(appConfig.maxBatchingWindow),
         scope: this,
         namingProvider: this.namingProvider,
       },
@@ -105,18 +112,32 @@ export class AutoStackCleanupStack extends cdk.Stack {
           path.join(__dirname, '../../dist/readLambda'),
         ),
         description: 'Get data from the database using the supplied id',
-        duration: 10,
+        duration: appConfig.lambdaMaxDuration,
         key: logKey.key,
         handler: 'index.handler',
         memorySize: 128,
         methods: ['get'],
-        name: 'getData',
+        name: 'cleanUpStacks',
         path: '/customers/{customerId}/{dataType}',
-        retentionDays: logs.RetentionDays.FOUR_MONTHS,
+        retentionDays: appConfig.logRetentionDuration,
         runtime: cdk.aws_lambda.Runtime.NODEJS_LATEST,
         skipCheckovRule: 'CKV_AWS_59',
-        specificTimes: [{ hour: 0, minute: 10 }],
+        specificTimes: [
+          { hour: appConfig.runTimeHour, minute: appConfig.runTimeMinute },
+        ],
         scope: this,
+      },
+    );
+
+    const snsEmailProvisder = snsProviderFactory.createEmailProvider(
+      'stackCleanUpNotification',
+      {
+        topicName: 'stackCleanUpNotification',
+        displayName: 'Stack Cleanup Emailer',
+        emailAddresses: appConfig.notificationEmails,
+        enableEncryption: false,
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+        publisherLambda: detectStaleStacksFunction.lambda,
       },
     );
 
@@ -131,23 +152,58 @@ export class AutoStackCleanupStack extends cdk.Stack {
 
     lambdaFactory.addEnvironmentVariables(detectStaleStacksFunction.lambda, [
       {
-        name: 'roleToAssume',
-        value: 'stackCleanupRole',
+        name: appVariables.DRY_RUN,
+        value: appConfig.DryRun,
       },
       {
-        name: 'staleAfterDays',
-        value: '60',
+        name: appVariables.ENVIRONMENT_TO_PROCESS,
+        value: appConfig.environmentToProcess,
       },
       {
-        name: 'queueArn',
+        name: appVariables.ROLE_TO_ASSUME,
+        value: appConfig.cleanupRole,
+      },
+      {
+        name: appVariables.STALE_AFTER_DAYS,
+        value: appConfig.staleAfterDays,
+      },
+      {
+        name: appVariables.TOPIC_ARN,
+        value: snsEmailProvisder.topic.topicArn,
+      },
+      {
+        name: appVariables.TOPIC_NAME,
+        value: snsEmailProvisder.topic.topicName,
+      },
+      {
+        name: appVariables.QUEUE_ARN,
         value: `${staleStackDeletionFunction.queue.queueArn}`,
       },
       {
-        name: 'queueName',
+        name: appVariables.QUEUE_NAME,
         value: `${staleStackDeletionFunction.queue.queueName}`,
       },
       {
-        name: 'queueUrl',
+        name: appVariables.QUEUE_URL,
+        value: `${staleStackDeletionFunction.queue.queueUrl}`,
+      },
+    ]);
+
+    lambdaFactory.addEnvironmentVariables(staleStackDeletionFunction.lambda, [
+      {
+        name: appVariables.ROLE_TO_ASSUME,
+        value: appConfig.cleanupRole,
+      },
+      {
+        name: appVariables.QUEUE_ARN,
+        value: `${staleStackDeletionFunction.queue.queueArn}`,
+      },
+      {
+        name: appVariables.QUEUE_NAME,
+        value: `${staleStackDeletionFunction.queue.queueName}`,
+      },
+      {
+        name: appVariables.QUEUE_URL,
         value: `${staleStackDeletionFunction.queue.queueUrl}`,
       },
     ]);

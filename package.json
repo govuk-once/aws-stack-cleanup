@@ -62,6 +62,8 @@
     "vitest": "^4.1.8"
   },
   "dependencies": {
+    "@aws-sdk/client-sns": "^3.1068.0",
+    "@aws-sdk/client-sqs": "^3.1068.0",
     "aws-cdk-lib": "2.215.0",
     "constructs": "^10.6.0",
     "once-platform-constructs": "^1.2.0",
