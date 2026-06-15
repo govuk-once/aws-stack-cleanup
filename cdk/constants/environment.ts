@@ -10,9 +10,9 @@ export enum GovUkOnceEnvironments {
 export const serviceMetadata = {
   serviceName: 'asc',
   teamName: 'platform-team',
-  repositoryUrl: 'https://github.com/govuk-once/example-service',
+  repositoryUrl: 'https://github.com/govuk-once/aws-stack-cleanup',
   version: '0.1.0',
-  costCenter: 'update-me',
+  costCenter: 'not Known',
 };
 
 // get environment
