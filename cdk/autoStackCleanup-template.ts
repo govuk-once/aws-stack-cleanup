@@ -8,7 +8,7 @@ const namingProvider = new ServiceEnvironmentNamingProvider(
   serviceMetadata.serviceName,
 );
 
-new AutoStackCleanupStack(app, 'CDKConstructsDemoStack', {
+new AutoStackCleanupStack(app, 'AutoStackCleanUp', {
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEFAULT_REGION || 'eu-west-2',
