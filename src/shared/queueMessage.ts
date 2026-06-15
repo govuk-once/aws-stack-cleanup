@@ -1,4 +1,5 @@
 export type QueueMessage = {
+  correlationId: string;
   batchId: string;
   accountId: string;
   accountName: string;

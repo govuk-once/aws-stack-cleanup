@@ -11,6 +11,7 @@ export const handler = async () => {
   const sqsClient = new SQSClient({});
 
   const message: QueueMessage = {
+    correlationId: crypto.randomUUID(),
     batchId: crypto.randomUUID(),
     accountId: '12345678',
     accountName: 'testing',
@@ -29,11 +30,13 @@ export const handler = async () => {
       }),
     );
   } catch (error) {
-    console.error('Failed to publish message', {
-      queueUrl: appVariables.QUEUE_URL,
-      message: JSON.stringify(message),
-      error,
-    });
+    console.error(
+      `Failed to publish message ${JSON.stringify({
+        queueUrl: appVariables.QUEUE_URL,
+        message: JSON.stringify(message),
+        error,
+      })}`,
+    );
   }
 
   try {
@@ -45,11 +48,15 @@ export const handler = async () => {
       }),
     );
   } catch (error) {
-    console.error('Failed to send email', {
-      topicArn: appVariables.TOPIC_ARN,
-      error,
-    });
+    console.error(
+      `Failed to send email ${JSON.stringify({
+        topicArn: appVariables.TOPIC_ARN,
+        error,
+      })}`,
+    );
   }
+
+  console.log(`Completed looking for stale stacks`);
 
   return {
     statusCode: 200,

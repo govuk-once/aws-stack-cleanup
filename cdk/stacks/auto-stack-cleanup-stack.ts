@@ -15,6 +15,10 @@ import { RoleHelper, Operations } from '../cdk_constructs/RoleHelper';
 import { KmsKeyFactory } from '../cdk_constructs/KmsKeyFactory';
 import { SnsProviderFactory } from '../cdk_constructs/SnsProviderFactory';
 
+import { fileURLToPath } from 'url';
+
+//const __dirname = fileURLToPath(import.meta.url);
+
 interface GovUkOnceStackProps extends cdk.StackProps {
   serviceName: string;
   teamName: string;
@@ -71,10 +75,10 @@ export class AutoStackCleanupStack extends cdk.Stack {
       {
         queueName: appConfig.queueName,
         code: lambda.Code.fromAsset(
-          path.join(__dirname, '../../dist/readLambda'),
+          path.join(__dirname, '../../dist/detectStaleStacks'),
         ),
         description: 'Get data from the database using the supplied id',
-        duration: appConfig.LambdaMaxDuration,
+        duration: appConfig.lambdaMaxDuration,
         key: logKey.key,
         handler: 'index.handler',
         memorySize: 128,
@@ -109,7 +113,7 @@ export class AutoStackCleanupStack extends cdk.Stack {
       {
         cronName: 'staleStackRunner',
         code: lambda.Code.fromAsset(
-          path.join(__dirname, '../../dist/readLambda'),
+          path.join(__dirname, '../../dist/staleStackDeletion'),
         ),
         description: 'Get data from the database using the supplied id',
         duration: appConfig.lambdaMaxDuration,

@@ -65,7 +65,7 @@ export interface ISqsProcessingLambda {
 
 export class LambdaFactory extends lambdaFactory {
   kmsKeyFactory: KmsKeyFactory;
-  namingProvider1: INamingProvider ;
+  namingProvider1: INamingProvider;
 
   constructor(
     private readonly scope1: Construct,
@@ -74,8 +74,9 @@ export class LambdaFactory extends lambdaFactory {
   ) {
     super(scope1, serviceName, namingProvider);
 
-    this.namingProvider1= namingProvider ?? new ServiceEnvironmentNamingProvider(serviceName);
-    this.kmsKeyFactory = new KmsKeyFactory(scope1, serviceName, namingProvider1);
+    this.namingProvider1 =
+      namingProvider ?? new ServiceEnvironmentNamingProvider(serviceName);
+    this.kmsKeyFactory = new KmsKeyFactory(scope1, serviceName, namingProvider);
   }
 
   public createSQSTriggeredLambda(
@@ -87,38 +88,44 @@ export class LambdaFactory extends lambdaFactory {
     let key: kms.IKey | undefined;
 
     if (props.enableEncryption) {
-      key = props.encryptionKey ?? this.kmsKeyFactory.createKey(id,{
-        alias: `${props.queueName}-key`,
-        description: 'KMS Key to secure the queue';
-      }).key;
+      key =
+        props.encryptionKey ??
+        this.kmsKeyFactory.createKey(id, {
+          alias: `${props.queueName}-key`,
+          description: 'KMS Key to secure the queue',
+        }).key;
     }
-
 
     const queue = new sqs.Queue(
       props.scope,
       props.namingProvider.getResourceName(id),
       {
         queueName: props.queueName,
-        visibilityTimeout: cdk.Duration.seconds(props.visibiltyTimeout.toSeconds() > props.duration * 6 ? props.visibiltyTimeout.toSeconds() : props.duration * 6),
+        visibilityTimeout: cdk.Duration.seconds(
+          props.visibiltyTimeout.toSeconds() > props.duration * 6
+            ? props.visibiltyTimeout.toSeconds()
+            : props.duration * 6,
+        ),
         retentionPeriod: props.retentionPeriod,
         fifo: props.fifo ?? false,
-        ...(props.enableEncryption && key ?
-            {
-                encryption: sqs.QueueEncryption.KMS,
-                encryptionMasterKey: key
-            } : {}),
+        ...(props.enableEncryption && key
+          ? {
+              encryption: sqs.QueueEncryption.KMS,
+              encryptionMasterKey: key,
+            }
+          : {}),
       },
     );
 
-    if(props.enableQueueTrigger ?? true){
-        lambdaFunction.addEventSource(
-            new lambdaEventSources.SqsEventSource(queue,{
-                batchSize: props.batchSize ?? 10,
-                maxBatchingWindow: props.maxBatchingWindow,
-                reportBatchItemFailures: true
-            }),
-        );
-        queue.grantConsumeMessages(lambdaFunction);
+    if (props.enableQueueTrigger ?? true) {
+      lambdaFunction.addEventSource(
+        new lambdaEventSources.SqsEventSource(queue, {
+          batchSize: props.batchSize ?? 10,
+          maxBatchingWindow: props.maxBatchingWindow,
+          reportBatchItemFailures: true,
+        }),
+      );
+      queue.grantConsumeMessages(lambdaFunction);
     }
 
     return {
@@ -165,7 +172,7 @@ export class LambdaFactory extends lambdaFactory {
           }),
         },
       );
-      
+
       rule.addTarget(new targets.LambdaFunction(lambdaFunction));
       rules.push(rule);
     });

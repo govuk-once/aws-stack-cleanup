@@ -15,10 +15,10 @@ export enum Operations {
   UPDATE = 'UPDATE',
   DELETE = 'DELETE',
   LIST = 'LIST',
-  ALL = 'ALL'
+  ALL = 'ALL',
 }
 
-export interface IRoleHelperProps  {
+export interface IRoleHelperProps {
   id: string;
   lambda: lambda.IFunction;
   table?: dynamodb.ITable;
@@ -29,33 +29,31 @@ export interface IRoleHelperProps  {
 
   //remove once added to main system
   scope: Construct;
-  namingProvider : INamingProvider;
+  namingProvider: INamingProvider;
 }
 
-export class RoleHelper extends roleHelper{
+export class RoleHelper extends roleHelper {
+  public addToResourcePolicyTokmsKey(scope: Construct, key: IKey) {
+    key.addToResourcePolicy(
+      new iam.PolicyStatement({
+        principals: [
+          new iam.ServicePrincipal(
+            `logs.${Stack.of(scope).region}.amazonaws.com`,
+          ),
+        ],
+        actions: [
+          'kms:Encrypt',
+          'kms:Decrypt',
+          'kms:ReEncrypt*',
+          'kms:GenerateDataKey*',
+          'kms:DescribeKey',
+        ],
+        resources: ['*'],
+      }),
+    );
+  }
 
-    public addToResourcePolicyTokmsKey(scope: Construct, key: IKey){
-
-        key.addToResourcePolicy(
-              new iam.PolicyStatement({
-                principals: [
-                  new iam.ServicePrincipal(`logs.${Stack.of(scope).region}.amazonaws.com`),
-                ],
-                actions: [
-                  'kms:Encrypt',
-                  'kms:Decrypt',
-                  'kms:ReEncrypt*',
-                  'kms:GenerateDataKey*',
-                  'kms:DescribeKey',
-                ],
-                resources: ['*'],
-              }),
-            );
-    }
-
-public addSQSOperationPermissionsToLambda(
-    props: IRoleHelperProps,
-  ): iam.Role {
+  public addSQSOperationPermissionsToLambda(props: IRoleHelperProps): iam.Role {
     if (!props.queue) throw 'queue must be supplied to add sqs roles to lambda';
 
     const role = this.findOrCreateRoleTemp(props);
@@ -96,7 +94,7 @@ public addSQSOperationPermissionsToLambda(
           set.add('sqs:DeleteMessageBatch');
           set.add('sqs:PurgeQueue');
           break;
-          case Operations.LIST:
+        case Operations.LIST:
           set.add('sqs:ListQueues');
           set.add('sqs:ListQueueTags');
           set.add('sqs:ListDeadLetterSourcesQueues');
@@ -127,4 +125,5 @@ public addSQSOperationPermissionsToLambda(
         ],
       },
     );
+  }
 }

@@ -24,7 +24,7 @@
     "cdk": "cdk",
     "cdk:watch": "cdk watch",
     "cdk:diff": "cdk diff",
-    "cdk:deploy": "cdk deploy --require-approval never",
+    "cdk:deploy": "cdk deploy ",
     "cdk:destroy": "cdk destroy",
     "lint:check": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -40,12 +40,13 @@
     "@cucumber/cucumber": "^12.9.0",
     "@cucumber/pretty-formatter": "^2.4.1",
     "@eslint/js": "^9.39.4",
+    "@types/aws-lambda": "^8.10.162",
     "@types/chai": "^5.2.3",
     "@types/node": "^24.13.2",
     "@typescript-eslint/eslint-plugin": "^8.61.0",
     "@typescript-eslint/parser": "^8.61.0",
     "@vitest/coverage-v8": "4.0.15",
-    "@vitest/ui": "^4.1.8",
+    "@vitest/ui": "^4.1.9",
     "aws-cdk": "2.1033.0",
     "chai": "^6.2.2",
     "concurrently": "^9.2.1",
@@ -59,7 +60,7 @@
     "ts-node": "^10.9.2",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.61.0",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.9"
   },
   "dependencies": {
     "@aws-sdk/client-sns": "^3.1068.0",
