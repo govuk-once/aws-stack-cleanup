@@ -41,7 +41,7 @@ export class AccountManager implements IAccountManager {
     return {
       credentials: response.Credentials,
       error: response.$metadata?.httpStatusCode,
-      valid: response.Credentials,
+      valid: response.Credentials != null,
     };
   }
 }
