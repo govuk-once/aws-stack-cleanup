@@ -195,6 +195,10 @@ export class AutoStackCleanupStack extends cdk.Stack {
         name: appVariables.QUEUE_URL,
         value: `${staleStackDeletionFunction.queue.queueUrl}`,
       },
+      {
+        name: appVariables.FEATURE_ID,
+        value: `PLAT-476`,
+      },
     ]);
 
     lambdaFactory.addEnvironmentVariables(staleStackDeletionFunction.lambda, [
@@ -213,6 +217,10 @@ export class AutoStackCleanupStack extends cdk.Stack {
       {
         name: appVariables.QUEUE_URL,
         value: `${staleStackDeletionFunction.queue.queueUrl}`,
+      },
+      {
+        name: appVariables.FEATURE_ID,
+        value: `PLAT-476`,
       },
     ]);
   }

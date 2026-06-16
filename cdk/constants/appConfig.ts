@@ -31,4 +31,5 @@ export const appVariables = {
   QUEUE_ARN: 'QUEUE_ARN',
   QUEUE_NAME: 'QUEUE_NAME',
   QUEUE_URL: 'QUEUE_URL',
+  FEATURE_ID: 'FEATURE_ID',
 };
