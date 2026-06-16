@@ -100,7 +100,7 @@ export class LambdaFactory extends lambdaFactory {
       props.scope,
       props.namingProvider.getResourceName(id),
       {
-        queueName: props.queueName,
+        queueName: props.namingProvider.getResourceName(props.queueName),
         visibilityTimeout: cdk.Duration.seconds(
           props.visibiltyTimeout.toSeconds() > props.duration * 6
             ? props.visibiltyTimeout.toSeconds()

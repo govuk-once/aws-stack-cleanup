@@ -50,7 +50,7 @@ describe('stale Stack Deletion', () => {
       UpdateReplacePolicy: 'Delete',
       Properties: {
         MessageRetentionPeriod: 86400,
-        QueueName: 'StackCleanup',
+        QueueName: Match.stringLikeRegexp('StackCleanup'),
         VisibilityTimeout: 3600,
       },
     });
