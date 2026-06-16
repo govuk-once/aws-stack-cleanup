@@ -71,19 +71,19 @@ export class AutoStackCleanupStack extends cdk.Stack {
     roleHelper.addToResourcePolicyTokmsKey(this, logKey.key);
 
     const staleStackDeletionFunction = lambdaFactory.createSQSTriggeredLambda(
-      'StackCleanupLambda',
+      'StackDeletionLambda',
       {
         queueName: appConfig.queueName,
         code: lambda.Code.fromAsset(
           path.join(__dirname, '../../dist/detectStaleStacks'),
         ),
-        description: 'Get data from the database using the supplied id',
+        description: 'Deletes stacks as request for data on the queue',
         duration: appConfig.lambdaMaxDuration,
         key: logKey.key,
         handler: 'index.handler',
         memorySize: 128,
         methods: ['get'],
-        name: 'cleanupStacks',
+        name: 'stackDeletion',
         path: '/customers/{customerId}/{dataType}',
         retentionDays: appConfig.logRetentionDuration,
         runtime: cdk.aws_lambda.Runtime.NODEJS_LATEST,
@@ -123,7 +123,7 @@ export class AutoStackCleanupStack extends cdk.Stack {
         handler: 'index.handler',
         memorySize: 128,
         methods: ['get'],
-        name: 'cleanUpStacks',
+        name: 'delectStaleStacks',
         path: '/customers/{customerId}/{dataType}',
         retentionDays: appConfig.logRetentionDuration,
         runtime: cdk.aws_lambda.Runtime.NODEJS_LATEST,
