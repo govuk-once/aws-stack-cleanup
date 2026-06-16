@@ -82,7 +82,7 @@ describe('stale Stack Deletion', () => {
     });
   });
 
-  test('Creates the stale detect Stale Stacks Lambda', () => {
+  test('Creates the detect Stale Stacks Lambda', () => {
     template.hasResource('AWS::Lambda::Function', {
       Properties: {
         FunctionName: Match.stringLikeRegexp('delectStaleStacks'),
@@ -95,7 +95,7 @@ describe('stale Stack Deletion', () => {
     });
   });
 
-  test('Creats the email SNS Topic', () => {
+  test('Creates the email SNS Topic', () => {
     template.hasResource('AWS::SNS::Topic', {
       Properties: {
         DisplayName: 'Stack Cleanup Emailer',
@@ -136,7 +136,7 @@ describe('stale Stack Deletion', () => {
     });
   });
 
-  test('Creats the email subscription', () => {
+  test('Creates the email subscription', () => {
     template.hasResource('AWS::SNS::Subscription', {
       Properties: {
         Endpoint: 'phill.armstrong@digital.cabinet-office.gov.uk',
@@ -144,6 +144,27 @@ describe('stale Stack Deletion', () => {
         TopicArn: {
           Ref: Match.stringLikeRegexp('stackcleanupnotificattopic'),
         },
+      },
+    });
+  });
+
+  test('Creates a cron job to call detect Stale Stacks Lambda', () => {
+    template.hasResource('AWS::Events::Rule', {
+      Properties: {
+        Name: 'staleStackRunner',
+        ScheduleExpression: 'cron(10 0 * * ? *)',
+        State: 'ENABLED',
+        Targets: [
+          {
+            Arn: {
+              'Fn::GetAtt': [
+                Match.stringLikeRegexp('stackdetectionlambda'),
+                'Arn',
+              ],
+            },
+            Id: 'Target0',
+          },
+        ],
       },
     });
   });

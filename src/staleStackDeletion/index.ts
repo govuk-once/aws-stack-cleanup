@@ -1,6 +1,6 @@
 import { SQSEvent } from 'aws-lambda';
-import { appVariables } from '../shared/appConfig';
-import { QueueMessage } from '../shared/queueMessage';
+import { appVariables } from './shared/appConfig';
+import { QueueMessage } from './shared/queueMessage';
 
 export const handler = async (event: SQSEvent) => {
   console.log(`queue ${appVariables.QUEUE_NAME} triggered lambda`);

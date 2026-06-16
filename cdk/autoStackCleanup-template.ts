@@ -1,5 +1,5 @@
 import * as cdk from 'aws-cdk-lib/core';
-import { AutoStackCleanupStack } from './stacks/auto-stack-cleanup-stack';
+import { AutoStackCleanupStack } from './stacks/autoStackCleanupStack';
 import { serviceMetadata } from './constants/environment';
 import { ServiceEnvironmentNamingProvider } from 'once-platform-constructs/namingProviders';
 const app = new cdk.App();

@@ -85,10 +85,10 @@ export class LambdaFactory extends lambdaFactory {
   ): ISqsProcessingLambda {
     const lambdaFunction = this.createLambda(id, props);
 
-    let key: kms.IKey | undefined;
+    let encryptionKey: kms.IKey | undefined;
 
     if (props.enableEncryption) {
-      key =
+      encryptionKey =
         props.encryptionKey ??
         this.kmsKeyFactory.createKey(`${id}-LambdalogKey`, {
           alias: `${props.queueName}-key`,
@@ -108,14 +108,18 @@ export class LambdaFactory extends lambdaFactory {
         ),
         retentionPeriod: props.retentionPeriod,
         fifo: props.fifo ?? false,
-        ...(props.enableEncryption && key
+        ...(props.enableEncryption && encryptionKey
           ? {
               encryption: sqs.QueueEncryption.KMS,
-              encryptionMasterKey: key,
+              encryptionMasterKey: encryptionKey,
             }
           : {}),
       },
     );
+
+    if (encryptionKey) {
+      encryptionKey.grant(lambdaFunction, 'kms:GenerateDataKey', 'kms:Decrypt');
+    }
 
     if (props.enableQueueTrigger ?? true) {
       lambdaFunction.addEventSource(

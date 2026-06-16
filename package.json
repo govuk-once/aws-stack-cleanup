@@ -14,7 +14,7 @@
     "build": "tsc",
     "watch": "tsc -w",
     "dev": "concurrently -n tsc,cdk -c purple,orange\"tsc -w\" \"cdk watch --hotswap\"",
-    "test": "vitest run",
+    "test": "pnpm run deploy:lambdas && vitest run",
     "test:unit": "vitest run --coverage src --passWithNoTests",
     "test:cdk": "vitest run --coverage cdk --passWithNoTests",
     "test:watch": "vitest",
@@ -24,7 +24,7 @@
     "cdk": "cdk",
     "cdk:watch": "cdk watch",
     "cdk:diff": "cdk diff",
-    "cdk:deploy": "cdk deploy ",
+    "cdk:deploy": "pnpm run deploy:lambdas && cdk deploy --require-approval never",
     "cdk:destroy": "cdk destroy",
     "lint:check": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -34,7 +34,8 @@
     "deploy:test": "cdk deploy --context environment=test --all --require-approval never",
     "deploy:dev": "cdk deploy --context environment=dev --all --require-approval never",
     "deploy:stag": "cdk deploy --context environment=stag --all --require-approval never",
-    "deploy:prod": "cdk deploy --context environment=prod --all --require-approval never"
+    "deploy:prod": "cdk deploy --context environment=prod --all --require-approval never",
+    "deploy:lambdas": "tsx scripts/deploy.ts"
   },
   "devDependencies": {
     "@cucumber/cucumber": "^12.9.0",
@@ -68,6 +69,7 @@
     "aws-cdk-lib": "2.215.0",
     "constructs": "^10.6.0",
     "once-platform-constructs": "^1.2.0",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "tsx": "^4.22.4"
   }
 }

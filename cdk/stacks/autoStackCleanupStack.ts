@@ -75,7 +75,7 @@ export class AutoStackCleanupStack extends cdk.Stack {
       {
         queueName: appConfig.queueName,
         code: lambda.Code.fromAsset(
-          path.join(__dirname, '../../dist/detectStaleStacks'),
+          path.join(__dirname, '../../dist/staleStackDeletion'),
         ),
         description: 'Deletes stacks as request for data on the queue',
         duration: appConfig.lambdaMaxDuration,
@@ -88,7 +88,7 @@ export class AutoStackCleanupStack extends cdk.Stack {
         retentionDays: appConfig.logRetentionDuration,
         runtime: cdk.aws_lambda.Runtime.NODEJS_LATEST,
         skipCheckovRule: 'CKV_AWS_59',
-        enableEncryption: true,
+        enableEncryption: false,
         retentionPeriod: cdk.Duration.days(appConfig.retentionPeriod),
         visibiltyTimeout: cdk.Duration.seconds(
           appConfig.visibiltyTimeoutSeconds,
@@ -115,7 +115,7 @@ export class AutoStackCleanupStack extends cdk.Stack {
       {
         cronName: 'staleStackRunner',
         code: lambda.Code.fromAsset(
-          path.join(__dirname, '../../dist/staleStackDeletion'),
+          path.join(__dirname, '../../dist/detectStaleStacks'),
         ),
         description: 'Get data from the database using the supplied id',
         duration: appConfig.lambdaMaxDuration,
