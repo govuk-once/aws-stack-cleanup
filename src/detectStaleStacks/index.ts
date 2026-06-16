@@ -1,8 +1,8 @@
 import { SNSClient, PublishCommand } from '@aws-sdk/client-sns';
 import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
 
-import { appVariables } from './shared/appConfig';
-import { QueueMessage } from './shared/queueMessage';
+import { appVariables } from '../shared/appConfig';
+import { QueueMessage } from '../shared/queueMessage';
 
 export const handler = async () => {
   console.log('Seeking stale stacks');

@@ -73,7 +73,9 @@ export class AutoStackCleanupStack extends cdk.Stack {
     const staleStackDeletionFunction = lambdaFactory.createSQSTriggeredLambda(
       'StackDeletionLambda',
       {
-        queueName: namingProvider?.getResourceName(appConfig.queueName),
+        queueName: namingProvider?.getResourceName(appConfig.queueName)
+          ? namingProvider?.getResourceName(appConfig.queueName)
+          : appConfig.queueName,
         code: lambda.Code.fromAsset(
           path.join(__dirname, '../../dist/staleStackDeletion'),
         ),
