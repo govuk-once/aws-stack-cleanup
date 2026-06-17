@@ -5,11 +5,13 @@ import { AccountName } from './infra-account-library/models/accounts/AccountName
 
 import { IAccountManager } from './interfaces/IAccountManager';
 import { IAssumedRole } from './interfaces/IAssumedRole';
-import { IStsClient } from './interfaces/ISTSClient';
+import { IStsClient } from './interfaces/IStsClient';
 
 import { STSClient, AssumeRoleCommand } from '@aws-sdk/client-sts';
 
 export class AccountManager implements IAccountManager {
+  constructor(protected stsClient: IStsClient = new STSClient({})) {}
+
   public getDevelopmentAccounts(): Account[] {
     const result: Account[] = [];
 
@@ -26,12 +28,12 @@ export class AccountManager implements IAccountManager {
   public async assumeRole(
     accountId: string,
     rolename: string,
-    stsClient: IStsClient = new STSClient({}),
+
     sessionName?: string,
   ): Promise<IAssumedRole> {
     const roleArn = `arn:aws:iam::${accountId}:role/${rolename}`;
 
-    const response = await stsClient.send(
+    const response = await this.stsClient.send(
       new AssumeRoleCommand({
         RoleArn: roleArn,
         RoleSessionName: sessionName ?? `session-${Date.now()}`,

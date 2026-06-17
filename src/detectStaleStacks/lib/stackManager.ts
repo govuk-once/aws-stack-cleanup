@@ -1,5 +1,4 @@
 import {
-  DescribeStackEventsCommand,
   DescribeStacksCommand,
   ListExportsCommand,
   ListExportsCommandOutput,
@@ -7,13 +6,19 @@ import {
   ListImportsCommandOutput,
   DescribeStacksCommandOutput,
   Stack,
+  CloudFormationClient,
 } from '@aws-sdk/client-cloudformation';
 
 import { ICloudFormationClient } from './interfaces/ICloudFormationClient';
+import { IStackManager } from './interfaces/IStackManager';
 import { IStackDependency } from './interfaces/IStackDependency';
 
-export class StackManager {
-  constructor(protected cloudFormationClient: ICloudFormationClient) {}
+export class StackManager implements IStackManager {
+  constructor(
+    protected cloudFormationClient: ICloudFormationClient = new CloudFormationClient(
+      {},
+    ),
+  ) {}
 
   public async getStacks(): Promise<Stack[]> {
     const stacks: Stack[] = [];

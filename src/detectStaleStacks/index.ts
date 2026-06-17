@@ -3,6 +3,7 @@ import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
 
 import { appVariables } from '../shared/appConfig';
 import { QueueMessage } from '../shared/queueMessage';
+import { Processor } from './Processor';
 
 export const handler = async () => {
   console.log('Seeking stale stacks');
@@ -21,6 +22,17 @@ export const handler = async () => {
     reason: 'can I send',
     lastTouched: `${Date.now()}`,
   };
+
+  try {
+    const processor = new Processor();
+    processor.Run();
+  } catch (error) {
+    console.error(
+      `Failed to run processor ${JSON.stringify({
+        error,
+      })}`,
+    );
+  }
 
   try {
     await sqsClient.send(

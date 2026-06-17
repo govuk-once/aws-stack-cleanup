@@ -1,9 +1,9 @@
-import { STSClient, AssumeRoleCommand } from '@aws-sdk/client-sts';
-import { beforeEach, describe, test, expect, vi } from 'vitest';
+import { AssumeRoleCommand } from '@aws-sdk/client-sts';
+import { describe, test, expect, vi } from 'vitest';
 
 import { AccountManager } from './accountManager';
 import { Account } from './infra-account-library/models/accounts/Account';
-import { IStsClient } from './interfaces/ISTSClient';
+import { IStsClient } from './interfaces/IStsClient';
 
 describe('Account Manager functional tests', () => {
   test('Should be able to get a list of all dev accounts', () => {
@@ -33,9 +33,6 @@ describe('Account Manager functional tests', () => {
   });
 
   test('Should be able to assume role', async () => {
-    const accountManager = new AccountManager();
-    const account = accountManager.getDevelopmentAccounts()[0];
-
     const mockCredentials = {
       AccessKeyId: 'test-access-key',
       SecretAccessKey: 'test-secrete-key',
@@ -51,11 +48,11 @@ describe('Account Manager functional tests', () => {
       send: sendMock,
     };
 
-    const role = await accountManager.assumeRole(
-      account.id,
-      'testRole',
-      mockStsClient,
-    );
+    const accountManager = new AccountManager(mockStsClient);
+
+    const account = accountManager.getDevelopmentAccounts()[0];
+
+    const role = await accountManager.assumeRole(account.id, 'testRole');
 
     expect(sendMock).toHaveBeenCalledTimes(1);
 
@@ -71,20 +68,16 @@ describe('Account Manager functional tests', () => {
   });
 
   test('Shouldnt be able to assume role', async () => {
-    const accountManager = new AccountManager();
-    const account = accountManager.getDevelopmentAccounts()[0];
-
     const sendMock = vi.fn().mockResolvedValue({});
 
     const mockStsClient: IStsClient = {
       send: sendMock,
     };
 
-    const role = await accountManager.assumeRole(
-      account.id,
-      'testRole',
-      mockStsClient,
-    );
+    const accountManager = new AccountManager(mockStsClient);
+    const account = accountManager.getDevelopmentAccounts()[0];
+
+    const role = await accountManager.assumeRole(account.id, 'testRole');
 
     expect(sendMock).toHaveBeenCalledTimes(1);
 
