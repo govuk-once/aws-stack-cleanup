@@ -197,7 +197,7 @@ export class AutoStackCleanupStack extends cdk.Stack {
       },
       {
         name: appVariables.FEATURE_ID,
-        value: `PLAT-476`,
+        value: `PLAT-477`,
       },
     ]);
 
