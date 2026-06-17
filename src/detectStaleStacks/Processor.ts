@@ -43,7 +43,8 @@ export class Processor {
     stacks.forEach((stack) => {
       if (
         this.hasTag(stack, appVariables.ENVIRONMENT_TO_PROCESS) &&
-        !this.hasTag(stack, 'Retain')
+        !this.hasTag(stack, 'Retain') &&
+        this.isOlderThanDays(stack, parseInt(appVariables.STALE_AFTER_DAYS, 10))
       ) {
         stacksToProcess.push(stack);
       } else {
@@ -80,5 +81,20 @@ export class Processor {
 
   protected hasTag(stack: Stack, tagName: String): boolean {
     return stack.Tags?.some((tag) => tag.Key === tagName) ?? false;
+  }
+
+  protected isOlderThanDays(stack: Stack, days: number): boolean {
+    const referenceDate = stack.LastUpdatedTime ?? stack.CreationTime;
+
+    if (!referenceDate) {
+      return false;
+    }
+
+    const now = new Date();
+
+    const stackAgeMS = now.getTime() - referenceDate.getTime();
+    const stackAgeDays = stackAgeMS / (1000 * 60 * 60 * 24);
+
+    return stackAgeDays > days;
   }
 }
