@@ -1,8 +1,8 @@
 import { IAccountManager } from './lib/interfaces/IAccountManager';
 import { IStackManager } from './lib/interfaces/IStackManager';
 import { IQueueProcessor } from './lib/interfaces/IQueueProcessor';
-import { AccountManager } from './lib/accountManager';
-import { StackManager } from './lib/stackManager';
+import { AccountManager } from './lib/AccountManager';
+import { StackManager } from './lib/StackManager';
 import { appVariables } from '../shared/appConfig';
 import { QueueMessage } from '../shared/queueMessage';
 import { Stack } from '@aws-sdk/client-cloudformation';
@@ -52,8 +52,12 @@ export class Processor {
       }
     });
 
-    this.sendToBeDeleted(account, stacksToProcess);
-    this.sendToBeReported(account, stacksNotToProcess);
+    if (appVariables.DRY_RUN && appVariables.DRY_RUN.toLowerCase() === 'true') {
+      this.sendToBeReported(account, stacksNotToProcess);
+    } else {
+      this.sendToBeDeleted(account, stacksToProcess);
+      this.sendToBeReported(account, stacksNotToProcess);
+    }
   }
 
   protected async sendToBeDeleted(

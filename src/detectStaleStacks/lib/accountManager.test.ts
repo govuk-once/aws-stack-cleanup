@@ -1,7 +1,7 @@
 import { AssumeRoleCommand } from '@aws-sdk/client-sts';
 import { describe, test, expect, vi } from 'vitest';
 
-import { AccountManager } from './accountManager';
+import { AccountManager } from './AccountManager';
 import { Account } from './infra-account-library/models/accounts/Account';
 import { IStsClient } from './interfaces/IStsClient';
 
