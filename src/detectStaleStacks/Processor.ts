@@ -1,6 +1,7 @@
 import { IAccountManager } from './lib/interfaces/IAccountManager';
 import { IEmailProcessor } from './lib/interfaces/IEmailProcessor';
 import { IStackManager } from './lib/interfaces/IStackManager';
+import { IStackReport } from './lib/interfaces/IStackReport';
 import { IQueueProcessor } from './lib/interfaces/IQueueProcessor';
 import { AccountManager } from './lib/accountManager';
 import { DateHelper } from './lib/DateHelper';
@@ -14,6 +15,7 @@ import { Account } from './lib/infra-account-library';
 
 export class Processor {
   protected dateHelper: DateHelper;
+  protected stackReports: IStackReport[];
 
   constructor(
     protected accountManager: IAccountManager = new AccountManager(),
@@ -22,45 +24,53 @@ export class Processor {
     protected queueProcessor: IQueueProcessor = new QueueProcessor(),
   ) {
     this.dateHelper = new DateHelper();
+    this.stackReports = [];
   }
 
   public async Run(): Promise<void> {
     const accounts = this.accountManager.getDevelopmentAccounts();
 
-    accounts.forEach(async (account) => {
-      const role = await this.accountManager.assumeRole(
-        account.id,
-        appVariables.ROLE_TO_ASSUME,
-      );
-
-      if (role.valid) {
-        await this.processStacks(account);
-      } else {
-        console.warn(
-          `Unable to assume role ${appVariables.ROLE_TO_ASSUME} for account ${account.name}:${account.id}`,
+    try {
+      accounts.forEach(async (account) => {
+        const role = await this.accountManager.assumeRole(
+          account.id,
+          appVariables.ROLE_TO_ASSUME,
         );
-      }
-    });
+
+        if (role.valid) {
+          this.stackReports.push(await this.processStacks(account));
+        } else {
+          console.warn(
+            `Unable to assume role ${appVariables.ROLE_TO_ASSUME} for account ${account.name}:${account.id}`,
+          );
+        }
+      });
+    } finally {
+      await this.emailProcessor.buildEmailAndSend(this.stackReports);
+    }
   }
 
-  protected async processStacks(account: Account): Promise<void> {
+  protected async processStacks(account: Account): Promise<IStackReport> {
     const stacks = await this.stackManager.getStacks();
     const stacksToProcess: Stack[] = [];
     const stacksNotToProcess: Stack[] = [];
 
-    stacks.forEach((stack) => {
-      if (
-        this.hasTag(stack, appVariables.ENVIRONMENT_TO_PROCESS) &&
-        !this.hasTag(stack, 'Retain') &&
-        this.isOlderThanDays(stack, parseInt(appVariables.STALE_AFTER_DAYS, 10))
-      ) {
-        stacksToProcess.push(stack);
-      } else {
-        stacksNotToProcess.push(stack);
-      }
-    });
-
     try {
+      stacks.forEach((stack) => {
+        if (
+          this.hasTag(stack, appVariables.ENVIRONMENT_TO_PROCESS) &&
+          !this.hasTag(stack, 'Retain') &&
+          this.isOlderThanDays(
+            stack,
+            parseInt(appVariables.STALE_AFTER_DAYS, 10),
+          )
+        ) {
+          stacksToProcess.push(stack);
+        } else {
+          stacksNotToProcess.push(stack);
+        }
+      });
+
       if (
         appVariables.DRY_RUN &&
         appVariables.DRY_RUN.toLowerCase() === 'true'
@@ -71,7 +81,12 @@ export class Processor {
         await this.sendToBeDeleted(account, stacksToProcess);
       }
     } finally {
-      this.emailProcessor.sendEmail();
+      return {
+        accountName: account.name,
+        accountNumber: account.id,
+        stacksToDelete: stacksToProcess,
+        stacksNotToDelete: stacksNotToProcess,
+      };
     }
   }
 

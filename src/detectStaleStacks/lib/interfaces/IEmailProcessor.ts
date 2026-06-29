@@ -1,5 +1,6 @@
 import { IStackReport } from './IStackReport';
 export interface IEmailProcessor {
   buildEmail(stackReport: IStackReport[]): string;
-  sendEmail(): void;
+  buildEmailAndSend(stackReport: IStackReport[]): void;
+  sendEmail(message: string): void;
 }

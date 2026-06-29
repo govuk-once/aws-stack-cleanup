@@ -10,13 +10,18 @@ export class EmailProcessor implements IEmailProcessor {
     return 'not impletemted';
   }
 
-  async sendEmail() {
+  public async buildEmailAndSend(stackReport: IStackReport[]): Promise<void> {
+    const emailMessage = this.buildEmail(stackReport);
+    await this.sendEmail(emailMessage);
+  }
+
+  public async sendEmail(message: string): Promise<void> {
     try {
       await this.snsClient.send(
         new PublishCommand({
           TopicArn: appVariables.TOPIC_ARN,
           Subject: 'Stack Deletion Report',
-          Message: 'Found things to delete',
+          Message: message,
         }),
       );
     } catch (error) {
