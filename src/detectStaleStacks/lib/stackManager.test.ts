@@ -1,7 +1,7 @@
 import { describe, test, expect, vi } from 'vitest';
 
 import { MockCloudFormationClient } from '../../testHelpers/mockCloudFormationClient';
-import { StackManager } from './stackManager';
+import { StackManager } from './StackManager';
 
 describe('Stack Manager tests', () => {
   test('Should list all active stacks', async () => {
