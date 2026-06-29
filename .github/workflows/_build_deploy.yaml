@@ -79,19 +79,18 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build Application
-        run: pnpm run build
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: arn:aws:iam::${{ inputs.aws_account }}:role/infra/GitHubDeploymentRole
           aws-region: ${{ inputs.aws_region }}
           role-session-name: ${{ github.event.repository.name }}-${{ inputs.environment }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Application
+        run: pnpm run build
 
       - name: Deploy to Environment
         run: pnpm run deploy:${{ inputs.environment }}
