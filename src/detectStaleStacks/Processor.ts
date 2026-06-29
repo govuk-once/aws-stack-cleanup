@@ -1,8 +1,11 @@
 import { IAccountManager } from './lib/interfaces/IAccountManager';
+import { IEmailProcessor } from './lib/interfaces/IEmailProcessor';
 import { IStackManager } from './lib/interfaces/IStackManager';
 import { IQueueProcessor } from './lib/interfaces/IQueueProcessor';
-import { AccountManager } from './lib/AccountManager';
-import { StackManager } from './lib/StackManager';
+import { AccountManager } from './lib/accountManager';
+import { DateHelper } from './lib/DateHelper';
+import { EmailProcessor } from './lib/EmailProcessor';
+import { StackManager } from './lib/stackManager';
 import { appVariables } from '../shared/appConfig';
 import { QueueMessage } from '../shared/queueMessage';
 import { Stack } from '@aws-sdk/client-cloudformation';
@@ -10,11 +13,16 @@ import { QueueProcessor } from './lib/QueueProcessor';
 import { Account } from './lib/infra-account-library';
 
 export class Processor {
+  protected dateHelper: DateHelper;
+
   constructor(
     protected accountManager: IAccountManager = new AccountManager(),
+    protected emailProcessor: IEmailProcessor = new EmailProcessor(),
     protected stackManager: IStackManager = new StackManager(),
     protected queueProcessor: IQueueProcessor = new QueueProcessor(),
-  ) {}
+  ) {
+    this.dateHelper = new DateHelper();
+  }
 
   public async Run(): Promise<void> {
     const accounts = this.accountManager.getDevelopmentAccounts();
@@ -52,11 +60,18 @@ export class Processor {
       }
     });
 
-    if (appVariables.DRY_RUN && appVariables.DRY_RUN.toLowerCase() === 'true') {
-      this.sendToBeReported(account, stacksNotToProcess);
-    } else {
-      this.sendToBeDeleted(account, stacksToProcess);
-      this.sendToBeReported(account, stacksNotToProcess);
+    try {
+      if (
+        appVariables.DRY_RUN &&
+        appVariables.DRY_RUN.toLowerCase() === 'true'
+      ) {
+        await this.sendToBeReported(account, stacksNotToProcess);
+      } else {
+        this.sendToBeReported(account, stacksNotToProcess);
+        await this.sendToBeDeleted(account, stacksToProcess);
+      }
+    } finally {
+      this.emailProcessor.sendEmail();
     }
   }
 
@@ -75,20 +90,22 @@ export class Processor {
         stackName: stack.stackName,
         deleteOrder: 1,
         reason: `Has not been updated for over ${appVariables.STALE_AFTER_DAYS} days`,
-        lastTouched: `${Date.now()}`,
+        lastTouched: this.dateHelper.getFormatedLastTouchedDate(
+          stacks.find((s) => s.StackName === stack.stackName),
+        ),
       };
       await this.queueProcessor.send(message);
     });
   }
 
-  protected sendToBeReported(account: Account, stacks: Stack[]): void {}
+  protected sendToBeReported(account: Account, stacks: Stack[]) {}
 
   protected hasTag(stack: Stack, tagName: String): boolean {
     return stack.Tags?.some((tag) => tag.Key === tagName) ?? false;
   }
 
   protected isOlderThanDays(stack: Stack, days: number): boolean {
-    const referenceDate = stack.LastUpdatedTime ?? stack.CreationTime;
+    const referenceDate = this.dateHelper.getLastTouchedDate(stack);
 
     if (!referenceDate) {
       return false;
