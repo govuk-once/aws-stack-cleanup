@@ -1,6 +1,7 @@
 import { SNSClient, PublishCommand } from '@aws-sdk/client-sns';
 import { Stack } from '@aws-sdk/client-cloudformation';
 import { IStackReport } from './interfaces/IStackReport';
+import { ISNSClient } from './interfaces/ISNSClient';
 import { appVariables } from '../../shared/appConfig';
 import { DateHelper } from './DateHelper';
 import { IEmailProcessor } from './interfaces/IEmailProcessor';
@@ -14,23 +15,30 @@ import {
 export class EmailProcessor implements IEmailProcessor {
   protected dateHelper: DateHelper;
 
-  constructor(protected snsClient: SNSClient = new SNSClient({})) {
+  constructor(protected snsClient: ISNSClient = new SNSClient({})) {
     this.dateHelper = new DateHelper();
   }
 
-  public buildEmail(stackReport: IStackReport[]): string {
+  public buildEmail(stackReport: IStackReport[], date: Date): string {
     let email = emailBody;
-    email = email.replace('@date@', new Date().toISOString());
-    email = email.replace(
-      '@report@',
-      stackReport.map((account) => this.buildAccountSection(account)).join(''),
-    );
+    email = email.replace('@date@', date.toISOString());
+    let report: string = '';
+
+    stackReport.forEach((account) => {
+      report += this.buildAccountSection(account);
+    });
+
+    email = email.replace('@report@', report);
     return email;
   }
 
-  public async buildEmailAndSend(stackReport: IStackReport[]): Promise<void> {
-    const emailMessage = this.buildEmail(stackReport);
+  public async buildEmailAndSend(
+    stackReport: IStackReport[],
+    date: Date = new Date(),
+  ): Promise<string> {
+    const emailMessage = this.buildEmail(stackReport, date);
     await this.sendEmail(emailMessage);
+    return emailMessage;
   }
 
   public async sendEmail(message: string): Promise<void> {
@@ -58,8 +66,10 @@ export class EmailProcessor implements IEmailProcessor {
         '@doNotDeleteReport@',
         this.buildTable(stackReport.stacksNotToDelete),
       )
-      .replace('@deleteReport@', this.buildTable(stackReport.stacksToDelete));
-    return '';
+      .replace('@deleteReport@', this.buildTable(stackReport.stacksToDelete))
+      .replace('@accountName@', stackReport.accountName)
+      .replace('@accountNumber@', stackReport.accountNumber);
+    return accountSection;
   }
 
   private buildTable(details: Stack[]): string {
@@ -79,7 +89,7 @@ export class EmailProcessor implements IEmailProcessor {
       rows += row;
     });
 
-    return table.replace('@rows', rows);
+    return table.replace('@rows@', rows);
   }
 
   private escapeHtml(item: string): string {
