@@ -46,7 +46,10 @@ export class Processor {
         }
       });
     } finally {
-      await this.emailProcessor.buildEmailAndSend(this.stackReports);
+      await this.emailProcessor.buildEmailAndSend(
+        this.stackReports,
+        new Date(),
+      );
     }
   }
 
