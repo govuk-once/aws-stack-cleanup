@@ -1,6 +1,8 @@
 import { SNSClient, PublishCommand } from '@aws-sdk/client-sns';
+import { Stack } from '@aws-sdk/client-cloudformation';
 import { IStackReport } from './interfaces/IStackReport';
 import { appVariables } from '../../shared/appConfig';
+import { DateHelper } from './DateHelper';
 import { IEmailProcessor } from './interfaces/IEmailProcessor';
 import {
   emailBody,
@@ -10,7 +12,11 @@ import {
 } from './emailTemplates';
 
 export class EmailProcessor implements IEmailProcessor {
-  constructor(protected snsClient: SNSClient = new SNSClient({})) {}
+  protected dateHelper: DateHelper;
+
+  constructor(protected snsClient: SNSClient = new SNSClient({})) {
+    this.dateHelper = new DateHelper();
+  }
 
   public buildEmail(stackReport: IStackReport[]): string {
     let email = emailBody;
@@ -47,7 +53,33 @@ export class EmailProcessor implements IEmailProcessor {
   }
 
   private buildAccountSection(stackReport: IStackReport): string {
+    const accountSection = emailAccountSection
+      .replace(
+        '@doNotDeleteReport@',
+        this.buildTable(stackReport.stacksNotToDelete),
+      )
+      .replace('@deleteReport@', this.buildTable(stackReport.stacksToDelete));
     return '';
+  }
+
+  private buildTable(details: Stack[]): string {
+    const table = emailTableBody;
+    let rows: string = '';
+    details.forEach((data) => {
+      const row = emailTableRow
+        .replace('@stackName@', this.escapeHtml(data.StackName ?? 'Not Set'))
+        .replace(
+          '@lastUpDated@',
+          this.escapeHtml(this.dateHelper.getFormatedLastTouchedDate(data)),
+        )
+        .replace(
+          '@stackStatus@',
+          this.escapeHtml(data.StackStatus ?? 'Not Known'),
+        );
+      rows += row;
+    });
+
+    return table.replace('@rows', rows);
   }
 
   private escapeHtml(item: string): string {
