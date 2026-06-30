@@ -1,0 +1,23 @@
+name: Test
+on: [pull_request]
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # V6.4.0
+        with:
+          node-version: 'lts/*'
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 11
+      - name: Configure CodeArtifact auth
+        uses: govuk-once/platform-actions/.github/actions/codeartifact-auth@717aab3ceeeea67948259bd6fe54d75be065b58a # Arbitrary version at branch
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+      - run: pnpm ci
+      - run: pnpm run test
