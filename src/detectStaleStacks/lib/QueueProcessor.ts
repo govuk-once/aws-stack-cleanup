@@ -1,9 +1,10 @@
 import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
+import { ISQSClient } from './interfaces/ISQSClient';
 import { QueueMessage } from '../../shared/queueMessage';
 import { appVariables } from '../../shared/appConfig';
 
 export class QueueProcessor {
-  constructor(protected sqsClient: SQSClient = new SQSClient({})) {}
+  constructor(protected sqsClient: ISQSClient = new SQSClient({})) {}
 
   public async send(message: QueueMessage): Promise<void> {
     try {
