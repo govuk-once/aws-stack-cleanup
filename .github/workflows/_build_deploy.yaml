@@ -61,18 +61,18 @@ jobs:
     concurrency:
       group: deploy-${{ inputs.environment }}
     steps:
+      - name: Configure CodeArtifact auth
+        uses: govuk-once/platform-actions/.github/actions/codeartifact-auth@ce0d38a2fb22c5f6bd8b8764a1572fbc080a52d1
+        with:
+          role-to-assume: arn:aws:iam::${{ inputs.aws_account }}:role/infra/GitHubDeploymentRole
+     
       - name: Checkout Repository
         uses: actions/checkout@v5
 
       - name: Get PNPM Version
         id: pnpm-version
         run: echo "pnpm_version=$(jq -r '.packageManager' package.json)" >> $GITHUB_OUTPUT
-
-      - name: Configure CodeArtifact auth
-        uses: govuk-once/platform-actions/.github/actions/codeartifact-auth@ce0d38a2fb22c5f6bd8b8764a1572fbc080a52d1
-        with:
-          role-to-assume: arn:aws:iam::${{ inputs.aws_account }}:role/infra/GitHubDeploymentRole
-          
+     
       - name: Install pnpm
         run: npm install -g ${{ steps.pnpm-version.outputs.pnpm_version }}
 
