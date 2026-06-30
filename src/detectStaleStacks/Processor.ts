@@ -57,27 +57,30 @@ export class Processor {
 
     try {
       stacks.forEach((stack) => {
-        if (
-          this.hasTag(stack, appVariables.ENVIRONMENT_TO_PROCESS) &&
-          !this.hasTag(stack, 'Retain') &&
-          this.isOlderThanDays(
-            stack,
-            parseInt(appVariables.STALE_AFTER_DAYS, 10),
-          )
-        ) {
-          stacksToProcess.push(stack);
-        } else {
-          stacksNotToProcess.push(stack);
+        try {
+          if (
+            this.hasTag(stack, appVariables.ENVIRONMENT_TO_PROCESS) &&
+            !this.hasTag(stack, 'Retain') &&
+            this.isOlderThanDays(
+              stack,
+              parseInt(appVariables.STALE_AFTER_DAYS, 10),
+            )
+          ) {
+            stacksToProcess.push(stack);
+          } else {
+            stacksNotToProcess.push(stack);
+          }
+        } catch (error) {
+          console.error(
+            `Unable to process stack ${stack.StackName} due to ${JSON.stringify(error)}`,
+          );
         }
       });
 
       if (
         appVariables.DRY_RUN &&
-        appVariables.DRY_RUN.toLowerCase() === 'true'
+        appVariables.DRY_RUN.toLowerCase() !== 'true'
       ) {
-        await this.sendToBeReported(account, stacksNotToProcess);
-      } else {
-        this.sendToBeReported(account, stacksNotToProcess);
         await this.sendToBeDeleted(account, stacksToProcess);
       }
     } finally {
