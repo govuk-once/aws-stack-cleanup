@@ -6,6 +6,11 @@ on:
       - main
 
 jobs:
+  Test:
+    name: 🧪  Test Code artifact
+    # needs: GetDependencies
+    secrets: inherit
+    uses: ./.github/workflows/test.yaml
   QualityChecks:
     name: 🧪  Quality Checks
     # needs: GetDependencies
