@@ -9,6 +9,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - name: Configure CodeArtifact auth
+        uses: govuk-once/platform-actions/.github/actions/codeartifact-auth@ce0d38a2fb22c5f6bd8b8764a1572fbc080a52d1
+        with:
+          role-to-assume: arn:aws:iam::${{ inputs.aws_account }}:role/infra/GitHubDeploymentRole
+
       - name: Checkout Repository
         uses: actions/checkout@v5
 
@@ -41,6 +46,11 @@ jobs:
     needs: AuthandCacheModules
     timeout-minutes: 10
     steps:
+      - name: Configure CodeArtifact auth
+        uses: govuk-once/platform-actions/.github/actions/codeartifact-auth@ce0d38a2fb22c5f6bd8b8764a1572fbc080a52d1
+        with:
+          role-to-assume: arn:aws:iam::${{ inputs.aws_account }}:role/infra/GitHubDeploymentRole    
+            
       - name: Checkout Repository
         uses: actions/checkout@v5
 
@@ -72,6 +82,11 @@ jobs:
     needs: AuthandCacheModules
     timeout-minutes: 10
     steps:
+      - name: Configure CodeArtifact auth
+        uses: govuk-once/platform-actions/.github/actions/codeartifact-auth@ce0d38a2fb22c5f6bd8b8764a1572fbc080a52d1
+        with:
+          role-to-assume: arn:aws:iam::${{ inputs.aws_account }}:role/infra/GitHubDeploymentRole
+
       - name: Checkout Repository
         uses: actions/checkout@v5
 
@@ -100,6 +115,11 @@ jobs:
     needs: AuthandCacheModules
     timeout-minutes: 10
     steps:
+      - name: Configure CodeArtifact auth
+        uses: govuk-once/platform-actions/.github/actions/codeartifact-auth@ce0d38a2fb22c5f6bd8b8764a1572fbc080a52d1
+        with:
+          role-to-assume: arn:aws:iam::${{ inputs.aws_account }}:role/infra/GitHubDeploymentRole
+
       - name: Checkout Repository
         uses: actions/checkout@v5
 
@@ -128,6 +148,11 @@ jobs:
     needs: AuthandCacheModules
     timeout-minutes: 10
     steps:
+      - name: Configure CodeArtifact auth
+        uses: govuk-once/platform-actions/.github/actions/codeartifact-auth@ce0d38a2fb22c5f6bd8b8764a1572fbc080a52d1
+        with:
+          role-to-assume: arn:aws:iam::${{ inputs.aws_account }}:role/infra/GitHubDeploymentRole
+
       - name: Checkout Repository
         uses: actions/checkout@v5
 
@@ -156,6 +181,11 @@ jobs:
     needs: AuthandCacheModules
     timeout-minutes: 10
     steps:
+      - name: Configure CodeArtifact auth
+        uses: govuk-once/platform-actions/.github/actions/codeartifact-auth@ce0d38a2fb22c5f6bd8b8764a1572fbc080a52d1
+        with:
+          role-to-assume: arn:aws:iam::${{ inputs.aws_account }}:role/infra/GitHubDeploymentRole
+
       - name: Checkout Repository
         uses: actions/checkout@v5
 
@@ -184,6 +214,11 @@ jobs:
     needs: [AuthandCacheModules, CDKSynth]
     timeout-minutes: 10
     steps:
+      - name: Configure CodeArtifact auth
+        uses: govuk-once/platform-actions/.github/actions/codeartifact-auth@ce0d38a2fb22c5f6bd8b8764a1572fbc080a52d1
+        with:
+          role-to-assume: arn:aws:iam::${{ inputs.aws_account }}:role/infra/GitHubDeploymentRole
+
       - name: Checkout Repository
         uses: actions/checkout@v5
 
