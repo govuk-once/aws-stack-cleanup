@@ -1,12 +1,12 @@
 import { describe, expect, test, vi, beforeEach } from 'vitest';
-import type { Stack } from '@aws-sdk/client-cloudformation';
+import { Stack } from '@aws-sdk/client-cloudformation';
 
 import { Processor } from './Processor';
-import type { IAccountManager } from './lib/interfaces/IAccountManager';
-import type { IEmailProcessor } from './lib/interfaces/IEmailProcessor';
-import type { IStackManager } from './lib/interfaces/IStackManager';
-import type { IQueueProcessor } from './lib/interfaces/IQueueProcessor';
-import type { Account } from './lib/infra-account-library';
+import { IAccountManager } from './lib/interfaces/IAccountManager';
+import { IEmailProcessor } from './lib/interfaces/IEmailProcessor';
+import { IStackManager } from './lib/interfaces/IStackManager';
+import { IQueueProcessor } from './lib/interfaces/IQueueProcessor';
+import { Account } from './lib/infra-account-library';
 import { AccountName } from './lib/infra-account-library/models/accounts/AccountName';
 import { EnvLabel } from './lib/infra-account-library/models/EnvLabel';
 
