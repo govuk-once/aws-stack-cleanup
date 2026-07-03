@@ -2,11 +2,7 @@ import { appVariables } from '../shared/appConfig';
 import { AccountManager } from '../shared/accountManager';
 import { QueueMessage } from '../shared/queueMessage';
 import { IAccountManager } from '../shared/interfaces/IAccountManager';
-import { ICloudFormationClient } from '../shared/interfaces/ICloudFormationClient';
-import {
-  CloudFormationClient,
-  DeleteStackCommand,
-} from '@aws-sdk/client-cloudformation';
+import { DeleteStackCommand } from '@aws-sdk/client-cloudformation';
 import { STSClient } from '@aws-sdk/client-sts';
 import { Credentials } from '@aws-sdk/client-sts';
 import { ICloudFormationClientFactory } from '../shared/interfaces/ICloudFormationClientFactory';
