@@ -68,6 +68,7 @@
     "@aws-sdk/client-sns": "^3.1068.0",
     "@aws-sdk/client-sqs": "^3.1068.0",
     "@aws-sdk/client-sts": "^3.1070.0",
+    "@aws-sdk/types": "^3.973.13",
     "aws-cdk-lib": "2.215.0",
     "constructs": "^10.6.0",
     "once-platform-constructs": "^1.2.0",
