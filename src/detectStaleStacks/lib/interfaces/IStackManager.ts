@@ -4,5 +4,9 @@ import { IStackDependency } from './IStackDependency';
 
 export interface IStackManager {
   getStacks(region: string, credentials: Credentials): Promise<Stack[]>;
-  getDeletionOrder(stacks: Stack[]): Promise<IStackDependency[]>;
+  getDeletionOrder(
+    stacks: Stack[],
+    region: string,
+    credentials: Credentials,
+  ): Promise<IStackDependency[]>;
 }
