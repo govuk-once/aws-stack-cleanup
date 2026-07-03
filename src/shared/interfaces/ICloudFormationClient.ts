@@ -1,16 +1,16 @@
 import {
-  CloudFormationClient,
-  DescribeStackEventsCommand,
+  DeleteStackCommand,
   DescribeStacksCommand,
   ListExportsCommand,
   ListImportsCommand,
-  DescribeStacksCommandOutput,
-  ListExportsCommandOutput,
-  ListImportsCommandOutput,
 } from '@aws-sdk/client-cloudformation';
 
 export interface ICloudFormationClient {
   send(
-    command: DescribeStacksCommand | ListExportsCommand | ListImportsCommand,
+    command:
+      | DescribeStacksCommand
+      | DeleteStackCommand
+      | ListExportsCommand
+      | ListImportsCommand,
   ): Promise<unknown>;
 }

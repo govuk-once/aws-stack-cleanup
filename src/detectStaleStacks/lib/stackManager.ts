@@ -8,24 +8,31 @@ import {
   Stack,
   CloudFormationClient,
 } from '@aws-sdk/client-cloudformation';
+import { Credentials } from '@aws-sdk/client-sts';
 
-import { ICloudFormationClient } from '../../shared/interfaces/ICloudFormationClient';
+import { ICloudFormationClientFactory } from '../../shared/interfaces/ICloudFormationClientFactory';
+import { CloudFormationClientFactory } from '../../shared/CloudFormationClientFactory';
 import { IStackManager } from './interfaces/IStackManager';
 import { IStackDependency } from './interfaces/IStackDependency';
 
 export class StackManager implements IStackManager {
   constructor(
-    protected cloudFormationClient: ICloudFormationClient = new CloudFormationClient(
-      {},
-    ),
+    protected cloudFormationClientFactory: ICloudFormationClientFactory = new CloudFormationClientFactory(),
   ) {}
 
-  public async getStacks(): Promise<Stack[]> {
+  public async getStacks(
+    region: string,
+    credentials: Credentials,
+  ): Promise<Stack[]> {
     const stacks: Stack[] = [];
     let nextToken: string | undefined;
 
+    const client = this.cloudFormationClientFactory.getClient(
+      region,
+      credentials,
+    );
     do {
-      const response = (await this.cloudFormationClient.send(
+      const response = (await client.send(
         new DescribeStacksCommand({
           NextToken: nextToken,
         }),
@@ -38,7 +45,11 @@ export class StackManager implements IStackManager {
     return stacks;
   }
 
-  public async getDeletionOrder(stacks: Stack[]): Promise<IStackDependency[]> {
+  public async getDeletionOrder(
+    stacks: Stack[],
+    region: string,
+    credentials: Credentials,
+  ): Promise<IStackDependency[]> {
     const activeStacks = stacks.filter(
       (stack) =>
         stack.StackName &&
@@ -53,18 +64,24 @@ export class StackManager implements IStackManager {
       dependencyMap.set(stack.StackName!, new Set());
     }
 
-    await this.addExportImportDependencies(dependencyMap);
+    await this.addExportImportDependencies(dependencyMap, region, credentials);
 
     return this.orderForDeletion(dependencyMap);
   }
 
   protected async addExportImportDependencies(
     dependencyMap: Map<string, Set<string>>,
+    region: string,
+    credentials: Credentials,
   ): Promise<void> {
     let nextToken: string | undefined;
 
+    const client = this.cloudFormationClientFactory.getClient(
+      region,
+      credentials,
+    );
     do {
-      const response = (await this.cloudFormationClient.send(
+      const response = (await client.send(
         new ListExportsCommand({
           NextToken: nextToken,
         }),
@@ -79,7 +96,7 @@ export class StackManager implements IStackManager {
           exportValue.ExportingStackId,
         );
 
-        const importResponse = (await this.cloudFormationClient.send(
+        const importResponse = (await client.send(
           new ListImportsCommand({
             ExportName: exportValue.Name,
           }),
