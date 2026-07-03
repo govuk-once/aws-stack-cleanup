@@ -3,7 +3,7 @@ import { IEmailProcessor } from './lib/interfaces/IEmailProcessor';
 import { IStackManager } from './lib/interfaces/IStackManager';
 import { IStackReport } from './lib/interfaces/IStackReport';
 import { IQueueProcessor } from './lib/interfaces/IQueueProcessor';
-import { AccountManager } from './lib/accountManager';
+import { AccountManager } from '../shared/accountManager';
 import { DateHelper } from './lib/DateHelper';
 import { EmailProcessor } from './lib/EmailProcessor';
 import { StackManager } from './lib/stackManager';
@@ -11,7 +11,7 @@ import { appVariables } from '../shared/appConfig';
 import { QueueMessage } from '../shared/queueMessage';
 import { Stack } from '@aws-sdk/client-cloudformation';
 import { QueueProcessor } from './lib/QueueProcessor';
-import { Account } from './lib/infra-account-library';
+import { Account } from '../shared/infra-account-library';
 
 export class Processor {
   protected dateHelper: DateHelper;

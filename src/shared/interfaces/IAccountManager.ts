@@ -1,5 +1,5 @@
-import { Account } from '../../detectStaleStacks/lib/infra-account-library/models/accounts/Account';
-import { IAssumedRole } from '../../detectStaleStacks/lib/interfaces/IAssumedRole';
+import { Account } from '../infra-account-library/models/accounts/Account';
+import { IAssumedRole } from './IAssumedRole';
 
 export interface IAccountManager {
   getDevelopmentAccounts(): Account[];
