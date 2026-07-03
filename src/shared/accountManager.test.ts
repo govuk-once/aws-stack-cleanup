@@ -11,10 +11,10 @@ describe('Account Manager functional tests', () => {
 
     const accounts = accountManager.getDevelopmentAccounts();
 
+    expect(accounts).toBeDefined();
     expect(accounts.length).toBe(4);
 
     let itemUnderTest: Account | undefined;
-    expect(accounts).toBeDefined();
 
     itemUnderTest = accounts.find((a) => a.name === 'govuk-app-bl-development');
     expect(itemUnderTest).toBeDefined();
