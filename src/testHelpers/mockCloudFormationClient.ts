@@ -10,7 +10,7 @@ import {
   StackStatus,
 } from '@aws-sdk/client-cloudformation';
 
-import { ICloudFormationClient } from '../detectStaleStacks/lib/interfaces/ICloudFormationClient';
+import { ICloudFormationClient } from '../shared/interfaces/ICloudFormationClient';
 
 export class MockCloudFormationClient implements ICloudFormationClient {
   public async send(command: unknown): Promise<unknown> {

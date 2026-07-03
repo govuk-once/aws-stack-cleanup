@@ -1,5 +1,0 @@
-{
-	"dependencies": {
-		"@aws-sdk/client-sts": "^3.1069.0"
-	}
-}

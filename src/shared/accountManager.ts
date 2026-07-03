@@ -5,7 +5,7 @@ import { AccountName } from './infra-account-library/models/accounts/AccountName
 
 import { IAccountManager } from './interfaces/IAccountManager';
 import { IAssumedRole } from './interfaces/IAssumedRole';
-import { IStsClient } from './interfaces/IStsClient';
+import { IStsClient } from '../../shared/interfaces/IStsClient';
 
 import { STSClient, AssumeRoleCommand } from '@aws-sdk/client-sts';
 
