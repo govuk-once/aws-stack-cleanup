@@ -1,5 +1,6 @@
 import { describe, expect, test, vi, beforeEach } from 'vitest';
 import { Stack } from '@aws-sdk/client-cloudformation';
+import type { Credentials } from '@aws-sdk/client-sts';
 
 import { Processor } from './Processor';
 import { IAccountManager } from '../shared/interfaces/IAccountManager';
@@ -12,7 +13,13 @@ import { EnvLabel } from '../shared/infra-account-library/models/EnvLabel';
 
 class TestProcessor extends Processor {
   public async testProcessStacks(account: Account) {
-    return this.processStacks(account);
+    const credentials: Credentials = {
+      AccessKeyId: 'test-access-key',
+      SecretAccessKey: 'test-secret-key',
+      SessionToken: 'test-session-token',
+      Expiration: new Date('2030-01-01T00:00:00Z'),
+    };
+    return this.processStacks(account, 'eu-west2', credentials);
   }
 }
 

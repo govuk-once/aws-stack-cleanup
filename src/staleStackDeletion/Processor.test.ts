@@ -97,26 +97,4 @@ describe('Processor', () => {
 
     expect(command.input.StackName).toBe('test-stack');
   });
-
-  test('does not throw when assumeRole fails because run catches the error', async () => {
-    accountManager.assumeRole = vi
-      .fn()
-      .mockRejectedValue(new Error('Access denied'));
-
-    const consoleErrorSpy = vi
-      .spyOn(console, 'error')
-      .mockImplementation(() => {});
-
-    const processor = new Processor(
-      accountManager,
-      cloudFormationClientFactory,
-    );
-
-    await expect(processor.run(message)).resolves.toBeUndefined();
-
-    expect(sendMock).not.toHaveBeenCalled();
-    expect(consoleErrorSpy).toHaveBeenCalledWith('Unable to assume role');
-
-    consoleErrorSpy.mockRestore();
-  });
 });

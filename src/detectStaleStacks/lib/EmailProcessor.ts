@@ -3,7 +3,7 @@ import { Stack } from '@aws-sdk/client-cloudformation';
 import { IStackReport } from './interfaces/IStackReport';
 import { ISNSClient } from './interfaces/ISNSClient';
 import { appVariables } from '../../shared/appConfig';
-import { DateHelper } from './DateHelper';
+import { DateHelper } from './dateHelper';
 import { IEmailProcessor } from './interfaces/IEmailProcessor';
 import {
   emailBody,

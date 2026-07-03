@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from 'vitest';
 
-import { MockSNSClient } from '../../testHelpers/mockSnsClient';
+import { MockSNSClient } from '../../testHelpers/mockSNSClient';
 import { expectedEmail } from '../../testHelpers/emailResult';
 import { EmailProcessor } from './EmailProcessor';
 import { IStackReport } from './interfaces/IStackReport';
