@@ -1,4 +1,4 @@
-import { IAccountManager } from './lib/interfaces/IAccountManager';
+import { IAccountManager } from '../shared/interfaces/IAccountManager';
 import { IEmailProcessor } from './lib/interfaces/IEmailProcessor';
 import { IStackManager } from './lib/interfaces/IStackManager';
 import { IStackReport } from './lib/interfaces/IStackReport';

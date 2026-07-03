@@ -3,7 +3,7 @@ import { describe, test, expect, vi } from 'vitest';
 
 import { AccountManager } from './AccountManager';
 import { Account } from './infra-account-library/models/accounts/Account';
-import { IStsClient } from './interfaces/IStsClient';
+import { IStsClient } from '../../shared/interfaces/IStsClient';
 
 describe('Account Manager functional tests', () => {
   test('Should be able to get a list of all dev accounts', () => {

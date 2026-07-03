@@ -9,7 +9,7 @@ import {
   CloudFormationClient,
 } from '@aws-sdk/client-cloudformation';
 
-import { ICloudFormationClient } from './interfaces/ICloudFormationClient';
+import { ICloudFormationClient } from '../../shared/interfaces/ICloudFormationClient';
 import { IStackManager } from './interfaces/IStackManager';
 import { IStackDependency } from './interfaces/IStackDependency';
 

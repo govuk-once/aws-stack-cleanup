@@ -2,7 +2,7 @@ import { describe, expect, test, vi, beforeEach } from 'vitest';
 import { Stack } from '@aws-sdk/client-cloudformation';
 
 import { Processor } from './Processor';
-import { IAccountManager } from './lib/interfaces/IAccountManager';
+import { IAccountManager } from '../shared/interfaces/IAccountManager';
 import { IEmailProcessor } from './lib/interfaces/IEmailProcessor';
 import { IStackManager } from './lib/interfaces/IStackManager';
 import { IQueueProcessor } from './lib/interfaces/IQueueProcessor';
