@@ -1,9 +1,9 @@
 import { AssumeRoleCommand } from '@aws-sdk/client-sts';
 import { describe, test, expect, vi } from 'vitest';
 
-import { AccountManager } from './AccountManager';
+import { AccountManager } from './accountManager';
 import { Account } from './infra-account-library/models/accounts/Account';
-import { IStsClient } from '../../shared/interfaces/IStsClient';
+import { IStsClient } from '../shared/interfaces/IStsClient';
 
 describe('Account Manager functional tests', () => {
   test('Should be able to get a list of all dev accounts', () => {

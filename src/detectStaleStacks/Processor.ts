@@ -12,6 +12,8 @@ import { QueueMessage } from '../shared/queueMessage';
 import { Stack } from '@aws-sdk/client-cloudformation';
 import { QueueProcessor } from './lib/QueueProcessor';
 import { Account } from '../shared/infra-account-library';
+import { CloudFormationClientFactory } from '../shared/CloudFormationClientFactory';
+import { Credentials } from '@aws-sdk/client-sts';
 
 export class Processor {
   protected dateHelper: DateHelper;
@@ -20,7 +22,9 @@ export class Processor {
   constructor(
     protected accountManager: IAccountManager = new AccountManager(),
     protected emailProcessor: IEmailProcessor = new EmailProcessor(),
-    protected stackManager: IStackManager = new StackManager(),
+    protected stackManager: IStackManager = new StackManager(
+      new CloudFormationClientFactory(),
+    ),
     protected queueProcessor: IQueueProcessor = new QueueProcessor(),
   ) {
     this.dateHelper = new DateHelper();
@@ -38,7 +42,9 @@ export class Processor {
         );
 
         if (role.valid) {
-          this.stackReports.push(await this.processStacks(account));
+          this.stackReports.push(
+            await this.processStacks(account, 'eu-west2', role.credentials),
+          );
         } else {
           console.warn(
             `Unable to assume role ${appVariables.ROLE_TO_ASSUME} for account ${account.name}:${account.id}`,
@@ -53,8 +59,12 @@ export class Processor {
     }
   }
 
-  protected async processStacks(account: Account): Promise<IStackReport> {
-    const stacks = await this.stackManager.getStacks();
+  protected async processStacks(
+    account: Account,
+    region: string,
+    credentials: Credentials,
+  ): Promise<IStackReport> {
+    const stacks = await this.stackManager.getStacks(region, credentials);
     const stacksToProcess: Stack[] = [];
     const stacksNotToProcess: Stack[] = [];
 
@@ -82,9 +92,14 @@ export class Processor {
 
       if (
         appVariables.DRY_RUN &&
-        appVariables.DRY_RUN.toLowerCase() !== 'true'
+        appVariables.DRY_RUN.toString().toLowerCase() !== 'true'
       ) {
-        await this.sendToBeDeleted(account, stacksToProcess);
+        await this.sendToBeDeleted(
+          account,
+          stacksToProcess,
+          region,
+          credentials,
+        );
       }
     } finally {
       return {
@@ -99,8 +114,14 @@ export class Processor {
   protected async sendToBeDeleted(
     account: Account,
     stacks: Stack[],
+    region: string,
+    credentials: Credentials,
   ): Promise<void> {
-    const orderedStacks = await this.stackManager.getDeletionOrder(stacks);
+    const orderedStacks = await this.stackManager.getDeletionOrder(
+      stacks,
+      region,
+      credentials,
+    );
     orderedStacks.forEach(async (stack) => {
       const message: QueueMessage = {
         correlationId: crypto.randomUUID(),
