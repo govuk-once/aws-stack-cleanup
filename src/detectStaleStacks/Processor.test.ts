@@ -6,9 +6,9 @@ import { IAccountManager } from '../shared/interfaces/IAccountManager';
 import { IEmailProcessor } from './lib/interfaces/IEmailProcessor';
 import { IStackManager } from './lib/interfaces/IStackManager';
 import { IQueueProcessor } from './lib/interfaces/IQueueProcessor';
-import { Account } from './lib/infra-account-library';
-import { AccountName } from './lib/infra-account-library/models/accounts/AccountName';
-import { EnvLabel } from './lib/infra-account-library/models/EnvLabel';
+import { Account } from '../shared/infra-account-library';
+import { AccountName } from '../shared/infra-account-library/models/accounts/AccountName';
+import { EnvLabel } from '../shared/infra-account-library/models/EnvLabel';
 
 class TestProcessor extends Processor {
   public async testProcessStacks(account: Account) {

@@ -2,14 +2,14 @@ import { SQSEvent } from 'aws-lambda';
 import { appVariables } from '../shared/appConfig';
 import { QueueMessage } from '../shared/queueMessage';
 import { Processor } from './Processor';
-import { STSClient } from '@aws-sdk/client-sts';
+import { AccountManager } from '../shared/accountManager';
 
 export const handler = async (event: SQSEvent) => {
   console.log(`queue ${appVariables.QUEUE_NAME} triggered lambda`);
 
   let recordCount: number = 0;
 
-  const processor: Processor = new Processor(new STSClient({}));
+  const processor: Processor = new Processor(new AccountManager({}));
 
   for (const record of event.Records) {
     try {
