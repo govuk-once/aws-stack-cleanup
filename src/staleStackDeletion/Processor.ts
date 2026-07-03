@@ -17,14 +17,23 @@ export class Processor {
   ) {}
 
   public async run(message: QueueMessage): Promise<void> {
-    try {
-      const credentials = await this.accountManager.assumeRole(
-        message.accountId,
-        appVariables.ROLE_TO_ASSUME,
+    const role = await this.accountManager.assumeRole(
+      message.accountId,
+      appVariables.ROLE_TO_ASSUME,
+    );
+
+    if (!role.valid) {
+      throw new Error(
+        `Unable to assume role ${appVariables.ROLE_TO_ASSUME} for account:${message.accountId} ${message.accountName}`,
       );
-      await this.deleteStack(message, credentials.credentials);
+    }
+
+    try {
+      await this.deleteStack(message, role.credentials);
     } catch (error) {
-      console.error(`Unable to assume role`);
+      console.error(
+        `Unable to delete stack ${message.stackName} in account:${message.accountId} ${message.accountName} due to ${JSON.stringify(error)}`,
+      );
     }
   }
 
