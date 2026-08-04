@@ -3,7 +3,7 @@ import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
 
 import { appVariables } from '../shared/appConfig';
 import { QueueMessage } from '../shared/queueMessage';
-import { Processor } from './processor';
+import { Processor } from './Processor';
 
 export const handler = async () => {
   console.log('Seeking stale stacks');
