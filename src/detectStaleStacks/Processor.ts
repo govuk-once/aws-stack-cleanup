@@ -101,14 +101,16 @@ export class Processor {
           credentials,
         );
       }
-    } finally {
-      return {
-        accountName: account.name,
-        accountNumber: account.id,
-        stacksToDelete: stacksToProcess,
-        stacksNotToDelete: stacksNotToProcess,
-      };
+    } catch (error) {
+      console.error(`Error occurred while processing stacks for account ${account.name}: ${JSON.stringify(error)}`);
     }
+
+    return {
+      accountName: account.name,
+      accountNumber: account.id,
+      stacksToDelete: stacksToProcess,
+      stacksNotToDelete: stacksNotToProcess,
+    };
   }
 
   protected async sendToBeDeleted(
