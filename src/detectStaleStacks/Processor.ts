@@ -142,9 +142,7 @@ export class Processor {
     });
   }
 
-  protected sendToBeReported(account: Account, stacks: Stack[]) {}
-
-  protected hasTag(stack: Stack, tagName: String): boolean {
+  protected hasTag(stack: Stack, tagName: string): boolean {
     return stack.Tags?.some((tag) => tag.Key === tagName) ?? false;
   }
 
