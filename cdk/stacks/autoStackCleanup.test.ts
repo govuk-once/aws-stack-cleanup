@@ -85,7 +85,7 @@ describe('stale Stack Deletion', () => {
   test('Creates the detect Stale Stacks Lambda', () => {
     template.hasResource('AWS::Lambda::Function', {
       Properties: {
-        FunctionName: Match.stringLikeRegexp('delectStaleStacks'),
+        FunctionName: Match.stringLikeRegexp('detectStaleStacks'),
         Environment: {
           Variables: {
             ROLE_TO_ASSUME: 'stackCleanupRole',

@@ -125,7 +125,7 @@ export class AutoStackCleanupStack extends cdk.Stack {
         handler: 'index.handler',
         memorySize: 128,
         methods: ['get'],
-        name: 'delectStaleStacks',
+        name: 'detectStaleStacks',
         path: '/customers/{customerId}/{dataType}',
         retentionDays: appConfig.logRetentionDuration,
         runtime: cdk.aws_lambda.Runtime.NODEJS_LATEST,
