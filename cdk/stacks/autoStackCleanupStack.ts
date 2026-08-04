@@ -2,7 +2,6 @@ import * as cdk from 'aws-cdk-lib';
 import * as path from 'path';
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
-import * as logs from 'aws-cdk-lib/aws-logs';
 
 import { isEphemeralEnvironment } from '../constants/environment';
 import { appConfig, appVariables } from '../constants/appConfig';
@@ -10,14 +9,13 @@ import { appConfig, appVariables } from '../constants/appConfig';
 import { INamingProvider } from 'once-platform-constructs/namingProviders';
 import { ServiceEnvironmentNamingProvider } from 'once-platform-constructs/namingProviders';
 import { LambdaFactory } from '../cdk_constructs/LambdaFactory';
-//import { RoleHelper, CrudOperations } from 'once-platform-constructs';
 import { RoleHelper, Operations } from '../cdk_constructs/RoleHelper';
 import { KmsKeyFactory } from '../cdk_constructs/KmsKeyFactory';
 import { SnsProviderFactory } from '../cdk_constructs/SnsProviderFactory';
 
 import { fileURLToPath } from 'url';
 
-//const __dirname = fileURLToPath(import.meta.url);
+const __dirname = fileURLToPath(import.meta.url);
 
 interface GovUkOnceStackProps extends cdk.StackProps {
   serviceName: string;
@@ -125,7 +123,7 @@ export class AutoStackCleanupStack extends cdk.Stack {
         handler: 'index.handler',
         memorySize: 128,
         methods: ['get'],
-        name: 'detectStaleStacks',
+        name: 'detectStale',
         path: '/customers/{customerId}/{dataType}',
         retentionDays: appConfig.logRetentionDuration,
         runtime: cdk.aws_lambda.Runtime.NODEJS_LATEST,
