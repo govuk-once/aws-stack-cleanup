@@ -9,7 +9,7 @@ export const handler = async (event: SQSEvent) => {
 
   let recordCount: number = 0;
 
-  const processor: Processor = new Processor(new AccountManager({}));
+  const processor: Processor = new Processor(new AccountManager());
 
   for (const record of event.Records) {
     try {

@@ -23,7 +23,6 @@
     "outDir": "dist",
     "rootDir": "src",
     "esModuleInterop": true,
-    "typeRoots": ["./node_modules/@types"],
     "resolveJsonModule": true
   },
   "include": ["src/**/*.ts"],
