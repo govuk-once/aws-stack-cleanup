@@ -17,7 +17,7 @@ jobs:
         with:
           version: 11
       - name: Configure CodeArtifact auth
-        uses: govuk-once/platform-actions/.github/actions/codeartifact-auth@717aab3ceeeea67948259bd6fe54d75be065b58a # Arbitrary version at branch
+        uses: govuk-once/platform-actions/.github/actions/codeartifact-auth@fff749cdfd839413978a28697eea25c8d2f9e1e7 # Arbitrary version at branch
         with:
           role-to-assume: ${{ secrets.AWS_ROLE }}
       - run: pnpm install --frozen-lockfile
