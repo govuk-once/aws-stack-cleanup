@@ -61,6 +61,14 @@ jobs:
     concurrency:
       group: deploy-${{ inputs.environment }}
     steps:
+
+      - name: Configure Aws Credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.DEPLOYMENT_ROLE_ARN }}
+          aws-region: eu-west-2
+          role-session-name: GH-Actions-Deploy-Development-Constructs
+
       - name: Configure CodeArtifact auth
         uses: govuk-once/platform-actions/.github/actions/codeartifact-auth@fff749cdfd839413978a28697eea25c8d2f9e1e7
         with:
