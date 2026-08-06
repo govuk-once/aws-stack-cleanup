@@ -47,7 +47,7 @@ The tools cover:
 - Infrastructure as Code
 - Dependency management
 - Linting and formatting
-- Testing (unit and BDD)
+- Testing (unit tests)
 - Build tooling
 - Security and secret scanning
 
@@ -106,7 +106,7 @@ These test will check the cloudformation outputted against known bad configurati
 - use eslint and prettier for formatting and linting
 - use precommit for Pre-commit hooks
 - use Vitest for unit test framework
-- use cucumber for BDD testing
+
 - use Esbuild as a build tool
 - use precommit for pre-commit hooks
 - use checkov for scanning iac
