@@ -9,14 +9,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+
       - name: setup node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: 'pnpm'
-
-      - name: Checkout Repository
-        uses: actions/checkout@v5
 
       - name: Configure CodeArtifact auth
         uses: govuk-once/platform-actions/.github/actions/codeartifact-auth@fff749cdfd839413978a28697eea25c8d2f9e1e7 # Arbitrary version at branch
