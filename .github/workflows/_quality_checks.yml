@@ -18,18 +18,17 @@ jobs:
           node-version-file: .nvmrc
           cache: 'pnpm'
 
+      - name: Install pnpm
+        run: npm install -g ${{ steps.pnpm-version.outputs.pnpm_version }}
+
       - name: Configure CodeArtifact auth
         uses: govuk-once/platform-actions/.github/actions/codeartifact-auth@fff749cdfd839413978a28697eea25c8d2f9e1e7 # Arbitrary version at branch
         with:
           role-to-assume: ${{ secrets.AWS_ROLE }}
 
-
       - name: Get PNPM Version
         id: pnpm-version
         run: echo "pnpm_version=$(jq -r '.packageManager' package.json)" >> $GITHUB_OUTPUT
-
-      - name: Install pnpm
-        run: npm install -g ${{ steps.pnpm-version.outputs.pnpm_version }}
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
