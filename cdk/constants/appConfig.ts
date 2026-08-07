@@ -1,8 +1,7 @@
-import { Environment } from 'aws-cdk-lib/aws-appconfig';
 import * as logs from 'aws-cdk-lib/aws-logs';
 
 export const appConfig = {
-  DryRun: 'true',
+  DryRun: 'false',
   lambdaMaxDuration: 10,
   logRetentionDuration: logs.RetentionDays.FOUR_MONTHS,
   staleAfterDays: '60',

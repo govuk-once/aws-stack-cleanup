@@ -53,6 +53,7 @@ export class LambdaFactory extends FactoryBase {
         return newFunction;
     }
 
+    // @deprecated Use addEnvironmentVariables instead
     addEnvironmentVariable(fn: lambda.IFunction, variable: IEnvironmentVariable): void {
         if (this.isLambdaFunction(fn)) {
             (fn as lambda.Function).addEnvironment(variable.name, variable.value);

@@ -143,10 +143,10 @@ export class AutoStackCleanupStack extends cdk.Stack {
       },
     );
 
-    const snsEmailProvisder = snsProviderFactory.createEmailProvider(
-      'stackCleanUpNotification',
+    const snsEmailProvider = snsProviderFactory.createEmailProvider(
+      'stackCleanUp',
       {
-        topicName: 'stackCleanUpNotification',
+        topicName: 'stackCleanUp',
         displayName: 'Stack Cleanup Emailer',
         emailAddresses: appConfig.notificationEmails,
         enableEncryption: false,
@@ -187,11 +187,11 @@ export class AutoStackCleanupStack extends cdk.Stack {
       },
       {
         name: appVariables.TOPIC_ARN,
-        value: snsEmailProvisder.topic.topicArn,
+        value: snsEmailProvider.topic.topicArn,
       },
       {
         name: appVariables.TOPIC_NAME,
-        value: snsEmailProvisder.topic.topicName,
+        value: snsEmailProvider.topic.topicName,
       },
       {
         name: appVariables.QUEUE_ARN,

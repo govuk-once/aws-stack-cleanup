@@ -1,6 +1,10 @@
 import { build } from 'esbuild';
 import * as path from 'node:path';
 import * as fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 type LambdaBuild = {
   source: string;
@@ -17,13 +21,6 @@ const nodeLambdas: LambdaBuild[] = [
     destination: '../dist/staleStackDeletion',
   },
 ];
-
-const copyFolder = (source: string, destination: string) => {
-  fs.cpSync(path.join(__dirname, source), path.join(__dirname, destination), {
-    recursive: true,
-    force: true,
-  });
-};
 
 export const packageLambdas = async () => {
   console.log(`building lambdas`);

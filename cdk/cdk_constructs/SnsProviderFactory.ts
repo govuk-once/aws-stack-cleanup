@@ -1,6 +1,6 @@
 import { Construct } from 'constructs';
 import { INamingProvider } from '../../lib/namingProviders/INamingProvider';
-import { FactoryBase } from './FactoryBase';
+import { FactoryBase } from '../../lib/FactoryBase.js';
 import { KmsKeyFactory } from './KmsKeyFactory';
 import * as cdk from 'aws-cdk-lib';
 import * as sns from 'aws-cdk-lib/aws-sns';
@@ -52,7 +52,7 @@ export class SnsProviderFactory extends FactoryBase {
         }).key;
     }
 
-    const topic = new sns.Topic(this.scope, `${this.getResourceId(id)}-topic`, {
+    const topic = new sns.Topic(this.scope, `${this.getResourceId(id)}Topic`, {
       topicName: props.topicName,
       displayName: props.displayName ?? props.topicName,
       masterKey: encryptionKey,

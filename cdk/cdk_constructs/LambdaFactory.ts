@@ -1,10 +1,9 @@
-import { LambdaFactory as baseLambdaFactory, ILambdaProperties, IEnvironmentVariable } from '../../lib/LambdaFactory';
+import { LambdaFactory as baseLambdaFactory, ILambdaProperties } from '../../lib/LambdaFactory';
 import { KmsKeyFactory } from './KmsKeyFactory';
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
-import * as logs from 'aws-cdk-lib/aws-logs';
 import * as events from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
 import * as kms from 'aws-cdk-lib/aws-kms';

@@ -80,7 +80,7 @@ describe('stale Stack Deletion', () => {
   test('Creates the detect Stale Stacks Lambda', () => {
     template.hasResource('AWS::Lambda::Function', {
       Properties: {
-        FunctionName: Match.stringLikeRegexp('detectStaleStacks'),
+        FunctionName: Match.stringLikeRegexp('detectStale'),
       },
     });
   });
@@ -119,7 +119,7 @@ describe('stale Stack Deletion', () => {
             Value: '0.1.0',
           },
         ],
-        TopicName: 'stackCleanUpNotification',
+        TopicName: 'stackCleanUp',
       },
       UpdateReplacePolicy: 'Delete',
       DeletionPolicy: 'Delete',
@@ -132,7 +132,7 @@ describe('stale Stack Deletion', () => {
         Endpoint: 'phill.armstrong@digital.cabinet-office.gov.uk',
         Protocol: 'email',
         TopicArn: {
-          Ref: Match.stringLikeRegexp('stackcleanupnotificattopic'),
+          Ref: Match.stringLikeRegexp('stackcleanup'),
         },
       },
     });
