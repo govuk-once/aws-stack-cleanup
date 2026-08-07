@@ -107,6 +107,33 @@ export class RoleHelper extends baseRoleHelper {
     return [...set];
   }
 
+  public addCloudFormationStackSetPermissionsToLambda(props: IRoleHelperProps): iam.Role {
+    const role = this.findOrCreateRoleTemp(props);
+
+    role.addToPolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          'cloudformation:ListStackSets',
+          'cloudformation:DescribeStackSet',
+          'cloudformation:DeleteStackSet',
+          'cloudformation:ListStackInstances',
+          'cloudformation:DescribeStackInstances',
+          'cloudformation:DeleteStackInstances',
+          'cloudformation:ListStackSetOperations',
+          'cloudformation:ListStacks',
+          'cloudformation:DescribeStacks',
+          'cloudformation:DeleteStack',
+          'cloudformation:ListExports',
+          'cloudformation:ListImports',
+        ],
+        resources: ['*'],
+      }),
+    );
+
+    return role;
+  }
+
   private findOrCreateRoleTemp(props: IRoleHelperProps): iam.Role {
     if (props.role) return props.role;
 

@@ -7,13 +7,16 @@ import { AccountManager } from '../shared/accountManager';
 import { DateHelper } from './lib/DateHelper';
 import { EmailProcessor } from './lib/EmailProcessor';
 import { StackManager } from './lib/stackManager';
-import { appVariables } from '../shared/appConfig';
 import { QueueMessage } from '../shared/queueMessage';
 import { Stack } from '@aws-sdk/client-cloudformation';
 import { QueueProcessor } from './lib/QueueProcessor';
 import { Account } from '../shared/infra-account-library';
 import { CloudFormationClientFactory } from '../shared/CloudFormationClientFactory';
-import { Credentials } from '@aws-sdk/client-sts';
+
+const APP_DEFAULTS = {
+  environmentToProcess: 'dev',
+  staleAfterDays: '60',
+};
 
 export class Processor {
   protected dateHelper: DateHelper;
@@ -35,22 +38,51 @@ export class Processor {
     const accounts = this.accountManager.getDevelopmentAccounts();
 
     try {
-      accounts.forEach(async (account) => {
-        const role = await this.accountManager.assumeRole(
-          account.id,
-          appVariables.ROLE_TO_ASSUME,
-        );
+      for (const account of accounts) {
+        try {
+          const stacks = await this.stackManager.getStacks('eu-west2');
+          const stacksToProcess: Stack[] = [];
+          const stacksNotToProcess: Stack[] = [];
 
-        if (role.valid) {
-          this.stackReports.push(
-            await this.processStacks(account, 'eu-west2', role.credentials),
-          );
-        } else {
-          console.warn(
-            `Unable to assume role ${appVariables.ROLE_TO_ASSUME} for account ${account.name}:${account.id}`,
-          );
+          for (const stack of stacks) {
+            try {
+              if (
+                this.hasTag(stack, process.env.ENVIRONMENT_TO_PROCESS || APP_DEFAULTS.environmentToProcess) &&
+                !this.hasTag(stack, 'Retain') &&
+                this.isOlderThanDays(
+                  stack,
+                  parseInt(process.env.STALE_AFTER_DAYS || APP_DEFAULTS.staleAfterDays, 10),
+                )
+              ) {
+                stacksToProcess.push(stack);
+              } else {
+                stacksNotToProcess.push(stack);
+              }
+            } catch (error) {
+              console.error(
+                `Unable to process stack ${stack.StackName} due to ${JSON.stringify(error)}`,
+              );
+            }
+          }
+
+          if (process.env.DRY_RUN && process.env.DRY_RUN.toString().toLowerCase() !== 'true') {
+            await this.sendToBeDeleted(
+              account,
+              stacksToProcess,
+              'eu-west2',
+            );
+          }
+
+          this.stackReports.push({
+            accountName: account.name,
+            accountNumber: account.id,
+            stacksToDelete: stacksToProcess,
+            stacksNotToDelete: stacksNotToProcess,
+          });
+        } catch (error) {
+          console.error(`Error occurred while processing stacks for account ${account.name}: ${JSON.stringify(error)}`);
         }
-      });
+      }
     } finally {
       await this.emailProcessor.buildEmailAndSend(
         this.stackReports,
@@ -59,70 +91,14 @@ export class Processor {
     }
   }
 
-  protected async processStacks(
-    account: Account,
-    region: string,
-    credentials: Credentials,
-  ): Promise<IStackReport> {
-    const stacks = await this.stackManager.getStacks(region, credentials);
-    const stacksToProcess: Stack[] = [];
-    const stacksNotToProcess: Stack[] = [];
-
-    try {
-      stacks.forEach((stack) => {
-        try {
-          if (
-            this.hasTag(stack, appVariables.ENVIRONMENT_TO_PROCESS) &&
-            !this.hasTag(stack, 'Retain') &&
-            this.isOlderThanDays(
-              stack,
-              parseInt(appVariables.STALE_AFTER_DAYS, 10),
-            )
-          ) {
-            stacksToProcess.push(stack);
-          } else {
-            stacksNotToProcess.push(stack);
-          }
-        } catch (error) {
-          console.error(
-            `Unable to process stack ${stack.StackName} due to ${JSON.stringify(error)}`,
-          );
-        }
-      });
-
-      if (
-        appVariables.DRY_RUN &&
-        appVariables.DRY_RUN.toString().toLowerCase() !== 'true'
-      ) {
-        await this.sendToBeDeleted(
-          account,
-          stacksToProcess,
-          region,
-          credentials,
-        );
-      }
-    } catch (error) {
-      console.error(`Error occurred while processing stacks for account ${account.name}: ${JSON.stringify(error)}`);
-    }
-
-    return {
-      accountName: account.name,
-      accountNumber: account.id,
-      stacksToDelete: stacksToProcess,
-      stacksNotToDelete: stacksNotToProcess,
-    };
-  }
-
   protected async sendToBeDeleted(
     account: Account,
     stacks: Stack[],
     region: string,
-    credentials: Credentials,
   ): Promise<void> {
     const orderedStacks = await this.stackManager.getDeletionOrder(
       stacks,
       region,
-      credentials,
     );
     orderedStacks.forEach(async (stack) => {
       const message: QueueMessage = {
@@ -133,7 +109,7 @@ export class Processor {
         region: 'eu-west2',
         stackName: stack.stackName,
         deleteOrder: 1,
-        reason: `Has not been updated for over ${appVariables.STALE_AFTER_DAYS} days`,
+        reason: `Has not been updated for over ${process.env.STALE_AFTER_DAYS || APP_DEFAULTS.staleAfterDays} days`,
         lastTouched: this.dateHelper.getFormatedLastTouchedDate(
           stacks.find((s) => s.StackName === stack.stackName),
         ),

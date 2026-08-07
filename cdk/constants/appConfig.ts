@@ -5,7 +5,6 @@ export const appConfig = {
   DryRun: 'true',
   lambdaMaxDuration: 10,
   logRetentionDuration: logs.RetentionDays.FOUR_MONTHS,
-  cleanupRole: 'stackCleanupRole',
   staleAfterDays: '60',
   environmentToProcess: 'dev',
 
@@ -24,7 +23,6 @@ export const appConfig = {
 export const appVariables = {
   DRY_RUN: 'DRY_RUN',
   ENVIRONMENT_TO_PROCESS: 'ENVIRONMENT_TO_PROCESS',
-  ROLE_TO_ASSUME: 'ROLE_TO_ASSUME',
   STALE_AFTER_DAYS: 'STALE_AFTER_DAYS',
   TOPIC_ARN: 'TOPIC_ARN',
   TOPIC_NAME: 'TOPIC_NAME',

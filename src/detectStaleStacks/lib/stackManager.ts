@@ -8,7 +8,6 @@ import {
   Stack,
   CloudFormationClient,
 } from '@aws-sdk/client-cloudformation';
-import { Credentials } from '@aws-sdk/client-sts';
 
 import { ICloudFormationClientFactory } from '../../shared/interfaces/ICloudFormationClientFactory';
 import { CloudFormationClientFactory } from '../../shared/CloudFormationClientFactory';
@@ -22,15 +21,11 @@ export class StackManager implements IStackManager {
 
   public async getStacks(
     region: string,
-    credentials: Credentials,
   ): Promise<Stack[]> {
     const stacks: Stack[] = [];
     let nextToken: string | undefined;
 
-    const client = this.cloudFormationClientFactory.getClient(
-      region,
-      credentials,
-    );
+    const client = this.cloudFormationClientFactory.getClient(region);
     do {
       const response = (await client.send(
         new DescribeStacksCommand({
@@ -48,7 +43,6 @@ export class StackManager implements IStackManager {
   public async getDeletionOrder(
     stacks: Stack[],
     region: string,
-    credentials: Credentials,
   ): Promise<IStackDependency[]> {
     const activeStacks = stacks.filter(
       (stack) =>
@@ -64,7 +58,7 @@ export class StackManager implements IStackManager {
       dependencyMap.set(stack.StackName!, new Set());
     }
 
-    await this.addExportImportDependencies(dependencyMap, region, credentials);
+    await this.addExportImportDependencies(dependencyMap, region);
 
     return this.orderForDeletion(dependencyMap);
   }
@@ -72,14 +66,10 @@ export class StackManager implements IStackManager {
   protected async addExportImportDependencies(
     dependencyMap: Map<string, Set<string>>,
     region: string,
-    credentials: Credentials,
   ): Promise<void> {
     let nextToken: string | undefined;
 
-    const client = this.cloudFormationClientFactory.getClient(
-      region,
-      credentials,
-    );
+    const client = this.cloudFormationClientFactory.getClient(region);
     do {
       const response = (await client.send(
         new ListExportsCommand({

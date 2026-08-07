@@ -60,11 +60,6 @@ describe('stale Stack Deletion', () => {
     template.hasResource('AWS::Lambda::Function', {
       Properties: {
         FunctionName: Match.stringLikeRegexp('stackDeletion'),
-        Environment: {
-          Variables: {
-            ROLE_TO_ASSUME: 'stackCleanupRole',
-          },
-        },
       },
     });
   });
@@ -86,11 +81,6 @@ describe('stale Stack Deletion', () => {
     template.hasResource('AWS::Lambda::Function', {
       Properties: {
         FunctionName: Match.stringLikeRegexp('detectStaleStacks'),
-        Environment: {
-          Variables: {
-            ROLE_TO_ASSUME: 'stackCleanupRole',
-          },
-        },
       },
     });
   });

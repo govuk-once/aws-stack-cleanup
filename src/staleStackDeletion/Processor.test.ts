@@ -1,20 +1,11 @@
 import { DeleteStackCommand } from '@aws-sdk/client-cloudformation';
-import type { Credentials } from '@aws-sdk/client-sts';
 import { describe, expect, vi, test, beforeEach } from 'vitest';
 
 import { Processor } from './Processor';
 import type { QueueMessage } from '../shared/queueMessage';
-import type { IAccountManager } from '../shared/interfaces/IAccountManager';
 import type { ICloudFormationClientFactory } from '../shared/interfaces/ICloudFormationClientFactory';
 
 describe('Processor', () => {
-  const credentials: Credentials = {
-    AccessKeyId: 'test-access-key',
-    SecretAccessKey: 'test-secret-key',
-    SessionToken: 'test-session-token',
-    Expiration: new Date('2030-01-01T00:00:00Z'),
-  };
-
   const message: QueueMessage = {
     correlationId: 'correlation-1',
     batchId: 'batch-1',
@@ -28,20 +19,12 @@ describe('Processor', () => {
   };
 
   let sendMock: ReturnType<typeof vi.fn>;
-  let accountManager: IAccountManager;
   let cloudFormationClientFactory: ICloudFormationClientFactory;
 
   beforeEach(() => {
     vi.clearAllMocks();
 
     sendMock = vi.fn().mockResolvedValue({});
-
-    accountManager = {
-      assumeRole: vi.fn().mockResolvedValue({
-        valid: true,
-        credentials,
-      }),
-    } as unknown as IAccountManager;
 
     cloudFormationClientFactory = {
       getClient: vi.fn().mockReturnValue({
@@ -50,22 +33,15 @@ describe('Processor', () => {
     } as unknown as ICloudFormationClientFactory;
   });
 
-  test('assumes the role for the target account and deletes the stack', async () => {
+  test('deletes the stack without assuming a role', async () => {
     const processor = new Processor(
-      accountManager,
       cloudFormationClientFactory,
     );
 
     await processor.run(message);
 
-    expect(accountManager.assumeRole).toHaveBeenCalledWith(
-      '123456789012',
-      expect.any(String),
-    );
-
     expect(cloudFormationClientFactory.getClient).toHaveBeenCalledWith(
       'eu-west-2',
-      credentials,
     );
 
     expect(sendMock).toHaveBeenCalledTimes(1);
@@ -80,15 +56,13 @@ describe('Processor', () => {
 
   test('deleteStack creates a CloudFormation client and sends DeleteStackCommand', async () => {
     const processor = new Processor(
-      accountManager,
       cloudFormationClientFactory,
     );
 
-    await processor.deleteStack(message, credentials);
+    await processor.deleteStack(message);
 
     expect(cloudFormationClientFactory.getClient).toHaveBeenCalledWith(
       'eu-west-2',
-      credentials,
     );
 
     expect(sendMock).toHaveBeenCalledTimes(1);

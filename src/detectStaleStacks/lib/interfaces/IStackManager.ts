@@ -1,12 +1,10 @@
 import { Stack } from '@aws-sdk/client-cloudformation';
-import { Credentials } from '@aws-sdk/client-sts';
 import { IStackDependency } from './IStackDependency';
 
 export interface IStackManager {
-  getStacks(region: string, credentials: Credentials): Promise<Stack[]>;
+  getStacks(region: string): Promise<Stack[]>;
   getDeletionOrder(
     stacks: Stack[],
     region: string,
-    credentials: Credentials,
   ): Promise<IStackDependency[]>;
 }

@@ -1,6 +1,5 @@
 import { describe, expect, test, vi, beforeEach } from 'vitest';
 import { Stack } from '@aws-sdk/client-cloudformation';
-import type { Credentials } from '@aws-sdk/client-sts';
 
 import { Processor } from './Processor';
 import { IAccountManager } from '../shared/interfaces/IAccountManager';
@@ -10,18 +9,6 @@ import { IQueueProcessor } from './lib/interfaces/IQueueProcessor';
 import { Account } from '../shared/infra-account-library';
 import { AccountName } from '../shared/infra-account-library/models/accounts/AccountName';
 import { EnvLabel } from '../shared/infra-account-library/models/EnvLabel';
-
-class TestProcessor extends Processor {
-  public async testProcessStacks(account: Account) {
-    const credentials: Credentials = {
-      AccessKeyId: 'test-access-key',
-      SecretAccessKey: 'test-secret-key',
-      SessionToken: 'test-session-token',
-      Expiration: new Date('2030-01-01T00:00:00Z'),
-    };
-    return this.processStacks(account, 'eu-west2', credentials);
-  }
-}
 
 describe('Processor', () => {
   const testDate = new Date(2026, 6, 4);
@@ -50,6 +37,7 @@ describe('Processor', () => {
     StackName: 'retained-stack',
     StackStatus: 'CREATE_COMPLETE',
     CreationTime: testDate,
+    LastUpdatedTime: testDate,
     Tags: [
       {
         Key: 'dev',
@@ -82,15 +70,13 @@ describe('Processor', () => {
 
   process.env.ENVIRONMENT_TO_PROCESS = 'dev';
   process.env.STALE_AFTER_DAYS = '60';
+  process.env.DRY_RUN = 'false';
 
   beforeEach(() => {
     vi.clearAllMocks();
 
     accountManager = {
       getDevelopmentAccounts: vi.fn().mockReturnValue([account]),
-      assumeRole: vi.fn().mockResolvedValue({
-        valid: true,
-      }),
     } as unknown as IAccountManager;
 
     emailProcessor = {
@@ -130,45 +116,65 @@ describe('Processor', () => {
   });
 
   test('splits stacks into stacks to delete and stacks not to delete', async () => {
-    const processor = new TestProcessor(
+    const processor = new Processor(
       accountManager,
       emailProcessor,
       stackManager,
       queueProcessor,
     );
 
-    const report = await processor.testProcessStacks(account);
+    await processor.Run();
 
-    expect(report.accountName).toBe('govuk-app-companion-development');
-    expect(report.accountNumber).toBe('123456789012');
+    expect(emailProcessor.buildEmailAndSend).toHaveBeenCalledOnce();
 
-    expect(report.stacksToDelete).toHaveLength(1);
-    expect(report.stacksToDelete[0].StackName).toBe('old-dev-stack');
+    const [reports] = (emailProcessor.buildEmailAndSend as ReturnType<typeof vi.fn>).mock.calls[0];
 
-    expect(report.stacksNotToDelete).toHaveLength(2);
+    expect(reports).toHaveLength(1);
+    expect(reports[0].accountName).toBe('govuk-app-companion-development');
+    expect(reports[0].accountNumber).toBe('123456789012');
+
+    expect(reports[0].stacksToDelete).toHaveLength(1);
+    expect(reports[0].stacksToDelete[0].StackName).toBe('old-dev-stack');
+
+    expect(reports[0].stacksNotToDelete).toHaveLength(2);
 
     expect(
-      report.stacksNotToDelete.some(
-        (stack) => stack.StackName === 'retained-stack',
+      reports[0].stacksNotToDelete.some(
+        (stack: Stack) => stack.StackName === 'retained-stack',
       ),
     ).toBe(true);
 
     expect(
-      report.stacksNotToDelete.some(
-        (stack) => stack.StackName === 'new-dev-stack',
+      reports[0].stacksNotToDelete.some(
+        (stack: Stack) => stack.StackName === 'new-dev-stack',
       ),
     ).toBe(true);
   });
 
-  test('does not send stacks to queue when dry run is true', async () => {
-    const processor = new TestProcessor(
+  test('sends stacks to queue when dry run is false', async () => {
+    const processor = new Processor(
       accountManager,
       emailProcessor,
       stackManager,
       queueProcessor,
     );
 
-    await processor.testProcessStacks(account);
+    await processor.Run();
+
+    expect(queueProcessor.send).toHaveBeenCalled();
+  });
+
+  test('does not send stacks to queue when dry run is true', async () => {
+    process.env.DRY_RUN = 'true';
+
+    const processor = new Processor(
+      accountManager,
+      emailProcessor,
+      stackManager,
+      queueProcessor,
+    );
+
+    await processor.Run();
 
     expect(queueProcessor.send).not.toHaveBeenCalled();
   });

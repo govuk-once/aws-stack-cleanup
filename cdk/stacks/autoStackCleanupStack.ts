@@ -110,6 +110,14 @@ export class AutoStackCleanupStack extends cdk.Stack {
       namingProvider: this.namingProvider,
     });
 
+    roleHelper.addCloudFormationStackSetPermissionsToLambda({
+      id: 'cloudFormationDeletion',
+      lambda: staleStackDeletionFunction.lambda,
+      operations: [Operations.DELETE],
+      scope: this,
+      namingProvider: this.namingProvider,
+    });
+
     const detectStaleStacksFunction = lambdaFactory.createScheduledLambda(
       'stackDetectionLambda',
       {
@@ -156,6 +164,14 @@ export class AutoStackCleanupStack extends cdk.Stack {
       namingProvider: this.namingProvider,
     });
 
+    roleHelper.addCloudFormationStackSetPermissionsToLambda({
+      id: 'cloudFormationStackSet',
+      lambda: detectStaleStacksFunction.lambda,
+      operations: [Operations.READ, Operations.DELETE],
+      scope: this,
+      namingProvider: this.namingProvider,
+    });
+
     lambdaFactory.addEnvironmentVariables(detectStaleStacksFunction.lambda, [
       {
         name: appVariables.DRY_RUN,
@@ -164,10 +180,6 @@ export class AutoStackCleanupStack extends cdk.Stack {
       {
         name: appVariables.ENVIRONMENT_TO_PROCESS,
         value: appConfig.environmentToProcess,
-      },
-      {
-        name: appVariables.ROLE_TO_ASSUME,
-        value: appConfig.cleanupRole,
       },
       {
         name: appVariables.STALE_AFTER_DAYS,
@@ -200,10 +212,6 @@ export class AutoStackCleanupStack extends cdk.Stack {
     ]);
 
     lambdaFactory.addEnvironmentVariables(staleStackDeletionFunction.lambda, [
-      {
-        name: appVariables.ROLE_TO_ASSUME,
-        value: appConfig.cleanupRole,
-      },
       {
         name: appVariables.QUEUE_ARN,
         value: `${staleStackDeletionFunction.queue.queueArn}`,
