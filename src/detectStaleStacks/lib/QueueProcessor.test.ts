@@ -1,4 +1,4 @@
-import { describe, test, expect, vi } from 'vitest';
+import { describe, test, expect } from 'vitest';
 
 import { MockSQSClient } from '../../testHelpers/mockSQSClient';
 import { QueueProcessor } from './QueueProcessor';
@@ -6,9 +6,9 @@ import { QueueMessage } from '../../shared/queueMessage';
 
 describe('Queue Processor tests', () => {
   test('Should be publish to a queue', async () => {
-    const mockQSQClient = new MockSQSClient();
+    const mockSQSClient = new MockSQSClient();
 
-    const processor = new QueueProcessor(mockQSQClient);
+    const processor = new QueueProcessor(mockSQSClient);
 
     const message: QueueMessage = {
       correlationId: 'g',
@@ -24,6 +24,6 @@ describe('Queue Processor tests', () => {
 
     processor.send(message);
 
-    expect(mockQSQClient.getCallCount()).toBe(1);
+    expect(mockSQSClient.getCallCount()).toBe(1);
   });
 });

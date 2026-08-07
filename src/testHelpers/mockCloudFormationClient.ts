@@ -1,12 +1,7 @@
 import {
-  CloudFormationClient,
-  DescribeStackEventsCommand,
   DescribeStacksCommand,
   ListExportsCommand,
   ListImportsCommand,
-  DescribeStacksCommandOutput,
-  ListExportsCommandOutput,
-  ListImportsCommandOutput,
   StackStatus,
 } from '@aws-sdk/client-cloudformation';
 

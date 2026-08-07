@@ -65,7 +65,9 @@ export class Processor {
             }
           }
 
-          if (process.env.DRY_RUN && process.env.DRY_RUN.toString().toLowerCase() !== 'true') {
+          if (process.env.DRY_RUN && process.env.DRY_RUN.toString().toLowerCase() === 'true') {
+            // DRY_RUN is enabled, skip actual deletions
+          } else {
             await this.sendToBeDeleted(
               account,
               stacksToProcess,
@@ -100,7 +102,7 @@ export class Processor {
       stacks,
       region,
     );
-    orderedStacks.forEach(async (stack) => {
+    await Promise.all(orderedStacks.map(async (stack) => {
       const message: QueueMessage = {
         correlationId: crypto.randomUUID(),
         batchId: crypto.randomUUID(),
@@ -115,7 +117,7 @@ export class Processor {
         ),
       };
       await this.queueProcessor.send(message);
-    });
+    }));
   }
 
   protected hasTag(stack: Stack, tagName: string): boolean {

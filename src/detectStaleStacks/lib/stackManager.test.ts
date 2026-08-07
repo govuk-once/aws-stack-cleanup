@@ -1,4 +1,4 @@
-import { describe, test, expect, vi } from 'vitest';
+import { describe, test, expect } from 'vitest';
 
 import { MockCloudFormationClientFactory } from '../../testHelpers/mockCloudFormationClientFactory';
 import { StackManager } from './stackManager';

@@ -6,7 +6,6 @@ import {
   ListImportsCommandOutput,
   DescribeStacksCommandOutput,
   Stack,
-  CloudFormationClient,
 } from '@aws-sdk/client-cloudformation';
 
 import { ICloudFormationClientFactory } from '../../shared/interfaces/ICloudFormationClientFactory';
@@ -133,9 +132,9 @@ export class StackManager implements IStackManager {
       }
       visiting.add(stackName);
 
-      const dependenices = dependencyMap.get(stackName) ?? new Set<string>();
+      const dependencies = dependencyMap.get(stackName) ?? new Set<string>();
 
-      for (const dependency of dependenices) {
+      for (const dependency of dependencies) {
         visit(dependency);
       }
 
@@ -143,7 +142,7 @@ export class StackManager implements IStackManager {
       visited.add(stackName);
       result.push({
         stackName,
-        dependsOn: Array.from(dependenices),
+        dependsOn: Array.from(dependencies),
       });
     };
 

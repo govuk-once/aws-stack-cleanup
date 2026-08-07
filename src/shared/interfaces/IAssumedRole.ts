@@ -1,7 +1,7 @@
 import { Credentials } from '@aws-sdk/client-sts';
 
 export interface IAssumedRole {
-  credentials: Credentials;
-  error: Error;
+  credentials: Credentials | undefined;
+  error: number | undefined;
   valid: boolean;
 }
