@@ -1,7 +1,7 @@
 import * as cdk from 'aws-cdk-lib/core';
 import { AutoStackCleanupStack } from './stacks/autoStackCleanupStack';
 import { serviceMetadata } from './constants/environment';
-import { ServiceEnvironmentNamingProvider } from 'once-platform-constructs/namingProviders';
+import { ServiceEnvironmentNamingProvider } from '../lib/namingProviders/ServiceEnvironmentNamingProvider';
 const app = new cdk.App();
 
 const namingProvider = new ServiceEnvironmentNamingProvider(

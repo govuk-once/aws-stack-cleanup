@@ -1,5 +1,5 @@
-import { INamingProvider } from 'once-platform-constructs/namingProviders';
-import { ServiceEnvironmentNamingProvider } from 'once-platform-constructs/namingProviders';
+import { INamingProvider } from '../../lib/namingProviders/INamingProvider';
+import { ServiceEnvironmentNamingProvider } from '../../lib/namingProviders/ServiceEnvironmentNamingProvider';
 
 export abstract class FactoryBase {
   private readonly namingProvider: INamingProvider;

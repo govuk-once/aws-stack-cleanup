@@ -1,4 +1,4 @@
-import { LambdaFactory as lambdaFactory } from 'once-platform-constructs';
+import { LambdaFactory as baseLambdaFactory, ILambdaProperties, IEnvironmentVariable } from '../../lib/LambdaFactory';
 import { KmsKeyFactory } from './KmsKeyFactory';
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
@@ -9,18 +9,8 @@ import * as events from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
 import * as kms from 'aws-cdk-lib/aws-kms';
 import * as lambdaEventSources from 'aws-cdk-lib/aws-lambda-event-sources';
-import { INamingProvider } from 'once-platform-constructs/namingProviders';
-import { ServiceEnvironmentNamingProvider } from 'once-platform-constructs/namingProviders';
-
-export interface ILambdaProperties extends lambda.FunctionProps {
-  duration: number;
-  key: cdk.aws_kms.Key;
-  methods?: string[];
-  name: string;
-  path?: string;
-  retentionDays?: logs.RetentionDays;
-  skipCheckovRule?: string;
-}
+import { INamingProvider } from '../../lib/namingProviders/INamingProvider';
+import { ServiceEnvironmentNamingProvider } from '../../lib/namingProviders/ServiceEnvironmentNamingProvider';
 
 export interface IScheduledTime {
   hour: number;
@@ -63,7 +53,7 @@ export interface ISqsProcessingLambda {
   queue: sqs.Queue;
 }
 
-export class LambdaFactory extends lambdaFactory {
+export class LambdaFactory extends baseLambdaFactory {
   kmsKeyFactory: KmsKeyFactory;
   namingProvider1: INamingProvider;
 

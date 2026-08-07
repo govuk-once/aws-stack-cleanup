@@ -1,5 +1,5 @@
 import { Construct } from 'constructs';
-import { INamingProvider } from 'once-platform-constructs/namingProviders';
+import { INamingProvider } from '../../lib/namingProviders/INamingProvider';
 import { FactoryBase } from './FactoryBase';
 import { KmsKeyFactory } from './KmsKeyFactory';
 import * as cdk from 'aws-cdk-lib';

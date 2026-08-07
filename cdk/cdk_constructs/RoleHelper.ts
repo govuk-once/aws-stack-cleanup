@@ -1,11 +1,11 @@
-import { RoleHelper as roleHelper } from 'once-platform-constructs';
+import { RoleHelper as baseRoleHelper } from '../../lib/RoleHelper';
+import { INamingProvider } from '../../lib/namingProviders/INamingProvider';
 import { Construct } from 'constructs';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
-import { INamingProvider } from 'once-platform-constructs/namingProviders';
 import { IKey } from 'aws-cdk-lib/aws-kms';
 import { Stack } from 'aws-cdk-lib';
 
@@ -23,16 +23,18 @@ export interface IRoleHelperProps {
   lambda: lambda.IFunction;
   table?: dynamodb.ITable;
   bucket?: s3.IBucket;
-  queue?: sqs.Queue;
   operations: Operations[];
   role?: iam.Role;
-
-  //remove once added to main system
+  queue?: sqs.Queue;
   scope: Construct;
   namingProvider: INamingProvider;
 }
 
-export class RoleHelper extends roleHelper {
+export class RoleHelper extends baseRoleHelper {
+  constructor(scope: Construct, serviceName: string, namingProvider?: INamingProvider) {
+    super(scope, serviceName, namingProvider);
+  }
+
   public addToResourcePolicyTokmsKey(scope: Construct, key: IKey) {
     key.addToResourcePolicy(
       new iam.PolicyStatement({
