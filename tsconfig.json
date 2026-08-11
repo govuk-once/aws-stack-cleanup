@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "node16",
-    "moduleResolution": "node16",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "types": ["node", "vitest/globals"],
     "lib": ["es2022"],
     "declaration": true,
@@ -21,11 +21,11 @@
     "strictPropertyInitialization": false,
     "skipLibCheck": true,
     "outDir": "dist",
-    "rootDir": "src",
+    "rootDir": ".",
     "esModuleInterop": true,
     "resolveJsonModule": true
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "scripts/**/*.ts", "cdk"],
   "exclude": ["cdk.out", "node_modules"]
 }
 
