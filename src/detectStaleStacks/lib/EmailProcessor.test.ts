@@ -156,6 +156,6 @@ describe('Stack Manager tests', () => {
 
     expect(mockClient.getCallCount()).toBe(1);
     expect(html).toBeDefined();
-    expect(html).toBe(expectedEmail);
+    expect(html).toEqual(expectedEmail);
   });
 });
