@@ -179,7 +179,7 @@ export class RoleHelper {
   }
 
   private getTableEncryptionKey(table: dynamodb.ITable): kms.IKey | undefined {
-    const tableProps = table as Record<string, unknown>;
+    const tableProps = table as unknown as Record<string, unknown>;
     if (
       tableProps &&
       typeof tableProps === 'object' &&
