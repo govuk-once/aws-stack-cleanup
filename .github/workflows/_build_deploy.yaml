@@ -68,9 +68,10 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Environment
-        uses: ./.github/workflows/_setup_environment.yml
+        uses: ./.github/actions/setup-environment
         with:
           environment: ${{ inputs.environment }}
+          aws-role-to-assume: ${{ secrets.DEPLOYMENT_ROLE_ARN }}
 
       - name: Build Application
         run: pnpm run build
