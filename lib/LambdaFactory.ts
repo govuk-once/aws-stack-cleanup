@@ -25,7 +25,7 @@ class constants {
   static DURATION = 10;
   static METHODS = ['get'];
   static PATH_ERROR = 'PATH NOT SET';
-  static RETENTION_DAYS;
+  static RETENTION_DAYS: cdk.aws_logs.RetentionDays | undefined;
 }
 
 export class LambdaFactory extends FactoryBase {
