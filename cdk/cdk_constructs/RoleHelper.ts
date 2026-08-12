@@ -31,7 +31,11 @@ export interface IRoleHelperProps {
 }
 
 export class RoleHelper extends baseRoleHelper {
-  constructor(scope: Construct, serviceName: string, namingProvider?: INamingProvider) {
+  constructor(
+    scope: Construct,
+    serviceName: string,
+    namingProvider?: INamingProvider,
+  ) {
     super(scope, serviceName, namingProvider);
   }
 
@@ -107,7 +111,9 @@ export class RoleHelper extends baseRoleHelper {
     return [...set];
   }
 
-  public addCloudFormationStackSetPermissionsToLambda(props: IRoleHelperProps): iam.Role {
+  public addCloudFormationStackSetPermissionsToLambda(
+    props: IRoleHelperProps,
+  ): iam.Role {
     const role = this.findOrCreateRoleTemp(props);
 
     role.addToPolicy(

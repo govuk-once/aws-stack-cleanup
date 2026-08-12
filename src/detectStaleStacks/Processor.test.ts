@@ -127,7 +127,9 @@ describe('Processor', () => {
 
     expect(emailProcessor.buildEmailAndSend).toHaveBeenCalledOnce();
 
-    const [reports] = (emailProcessor.buildEmailAndSend as ReturnType<typeof vi.fn>).mock.calls[0];
+    const [reports] = (
+      emailProcessor.buildEmailAndSend as ReturnType<typeof vi.fn>
+    ).mock.calls[0];
 
     expect(reports).toHaveLength(1);
     expect(reports[0].accountName).toBe('govuk-app-companion-development');

@@ -88,7 +88,6 @@ describe('Stack Manager tests', () => {
     const testDate1 = new Date(Date.parse('2026-01-01T00:00:00.000Z'));
     const testDate2 = new Date(Date.parse('2022-01-01T00:00:00.000Z'));
 
-
     const stackReport1: IStackReport = {
       accountName: 'Account1',
       accountNumber: '1',

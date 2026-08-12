@@ -47,11 +47,18 @@ export class Processor {
           for (const stack of stacks) {
             try {
               if (
-                this.hasTag(stack, process.env.ENVIRONMENT_TO_PROCESS || APP_DEFAULTS.environmentToProcess) &&
+                this.hasTag(
+                  stack,
+                  process.env.ENVIRONMENT_TO_PROCESS ||
+                    APP_DEFAULTS.environmentToProcess,
+                ) &&
                 !this.hasTag(stack, 'Retain') &&
                 this.isOlderThanDays(
                   stack,
-                  parseInt(process.env.STALE_AFTER_DAYS || APP_DEFAULTS.staleAfterDays, 10),
+                  parseInt(
+                    process.env.STALE_AFTER_DAYS || APP_DEFAULTS.staleAfterDays,
+                    10,
+                  ),
                 )
               ) {
                 stacksToProcess.push(stack);
@@ -65,14 +72,13 @@ export class Processor {
             }
           }
 
-          if (process.env.DRY_RUN && process.env.DRY_RUN.toString().toLowerCase() === 'true') {
+          if (
+            process.env.DRY_RUN &&
+            process.env.DRY_RUN.toString().toLowerCase() === 'true'
+          ) {
             // DRY_RUN is enabled, skip actual deletions
           } else {
-            await this.sendToBeDeleted(
-              account,
-              stacksToProcess,
-              'eu-west2',
-            );
+            await this.sendToBeDeleted(account, stacksToProcess, 'eu-west2');
           }
 
           this.stackReports.push({
@@ -82,7 +88,9 @@ export class Processor {
             stacksNotToDelete: stacksNotToProcess,
           });
         } catch (error) {
-          console.error(`Error occurred while processing stacks for account ${account.name}: ${JSON.stringify(error)}`);
+          console.error(
+            `Error occurred while processing stacks for account ${account.name}: ${JSON.stringify(error)}`,
+          );
         }
       }
     } finally {
@@ -102,22 +110,24 @@ export class Processor {
       stacks,
       region,
     );
-    await Promise.all(orderedStacks.map(async (stack) => {
-      const message: QueueMessage = {
-        correlationId: crypto.randomUUID(),
-        batchId: crypto.randomUUID(),
-        accountId: account.id,
-        accountName: account.name,
-        region: 'eu-west2',
-        stackName: stack.stackName,
-        deleteOrder: 1,
-        reason: `Has not been updated for over ${process.env.STALE_AFTER_DAYS || APP_DEFAULTS.staleAfterDays} days`,
-        lastTouched: this.dateHelper.getFormatedLastTouchedDate(
-          stacks.find((s) => s.StackName === stack.stackName),
-        ),
-      };
-      await this.queueProcessor.send(message);
-    }));
+    await Promise.all(
+      orderedStacks.map(async (stack) => {
+        const message: QueueMessage = {
+          correlationId: crypto.randomUUID(),
+          batchId: crypto.randomUUID(),
+          accountId: account.id,
+          accountName: account.name,
+          region: 'eu-west2',
+          stackName: stack.stackName,
+          deleteOrder: 1,
+          reason: `Has not been updated for over ${process.env.STALE_AFTER_DAYS || APP_DEFAULTS.staleAfterDays} days`,
+          lastTouched: this.dateHelper.getFormatedLastTouchedDate(
+            stacks.find((s) => s.StackName === stack.stackName),
+          ),
+        };
+        await this.queueProcessor.send(message);
+      }),
+    );
   }
 
   protected hasTag(stack: Stack, tagName: string): boolean {

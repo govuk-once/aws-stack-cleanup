@@ -22,4 +22,3 @@ new AutoStackCleanupStack(app, 'AutoStackCleanUp', {
   costCenter: serviceMetadata.costCenter,
   environment: namingProvider.getEnvironment(),
 });
-

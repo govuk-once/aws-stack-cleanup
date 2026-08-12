@@ -34,9 +34,7 @@ describe('Processor', () => {
   });
 
   test('deletes the stack without assuming a role', async () => {
-    const processor = new Processor(
-      cloudFormationClientFactory,
-    );
+    const processor = new Processor(cloudFormationClientFactory);
 
     await processor.run(message);
 
@@ -55,9 +53,7 @@ describe('Processor', () => {
   });
 
   test('deleteStack creates a CloudFormation client and sends DeleteStackCommand', async () => {
-    const processor = new Processor(
-      cloudFormationClientFactory,
-    );
+    const processor = new Processor(cloudFormationClientFactory);
 
     await processor.deleteStack(message);
 

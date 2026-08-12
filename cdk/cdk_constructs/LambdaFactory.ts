@@ -1,4 +1,7 @@
-import { LambdaFactory as baseLambdaFactory, ILambdaProperties } from '../../lib/LambdaFactory';
+import {
+  LambdaFactory as baseLambdaFactory,
+  ILambdaProperties,
+} from '../../lib/LambdaFactory';
 import { KmsKeyFactory } from './KmsKeyFactory';
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';

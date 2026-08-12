@@ -24,10 +24,7 @@ describe('Stack Manager tests', () => {
 
     const stacks = await manager.getStacks('eu-west-2');
 
-    const deletionOrder = await manager.getDeletionOrder(
-      stacks,
-      'eu-west-2',
-    );
+    const deletionOrder = await manager.getDeletionOrder(stacks, 'eu-west-2');
 
     const apiStack = deletionOrder.find(
       (item) => item.stackName === 'ApiStack',

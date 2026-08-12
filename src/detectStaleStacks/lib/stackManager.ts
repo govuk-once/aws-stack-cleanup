@@ -18,9 +18,7 @@ export class StackManager implements IStackManager {
     protected cloudFormationClientFactory: ICloudFormationClientFactory = new CloudFormationClientFactory(),
   ) {}
 
-  public async getStacks(
-    region: string,
-  ): Promise<Stack[]> {
+  public async getStacks(region: string): Promise<Stack[]> {
     const stacks: Stack[] = [];
     let nextToken: string | undefined;
 

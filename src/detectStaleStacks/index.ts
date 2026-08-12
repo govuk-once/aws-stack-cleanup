@@ -43,8 +43,7 @@ export const handler = async () => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      message:
-        'OK'
-      }),
+      message: 'OK',
+    }),
   };
 };

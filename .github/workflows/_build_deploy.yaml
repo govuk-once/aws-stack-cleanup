@@ -78,4 +78,3 @@ jobs:
 
       - name: Deploy to Environment
         run: pnpm run deploy:${{ inputs.environment }}
-

@@ -28,4 +28,3 @@
   "include": ["src/**/*.ts", "scripts/**/*.ts", "cdk"],
   "exclude": ["cdk.out", "node_modules"]
 }
-
