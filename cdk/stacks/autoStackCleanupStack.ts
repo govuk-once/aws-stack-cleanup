@@ -75,7 +75,7 @@ export class AutoStackCleanupStack extends cdk.Stack {
           ? namingProvider?.getResourceName(appConfig.queueName)
           : appConfig.queueName,
         code: lambda.Code.fromAsset(
-          path.join(__dirname, '../../dist/src/staleStackDeletion'),
+          path.join(__dirname, '../../../dist/src/staleStackDeletion'),
         ),
         description: 'Deletes stacks as request for data on the queue',
         duration: appConfig.lambdaMaxDuration,
@@ -123,7 +123,7 @@ export class AutoStackCleanupStack extends cdk.Stack {
       {
         cronName: 'staleStackRunner',
         code: lambda.Code.fromAsset(
-          path.join(__dirname, '../../dist/src/detectStaleStacks'),
+          path.join(__dirname, '../../../dist/src/detectStaleStacks'),
         ),
         description: 'Get data from the database using the supplied id',
         duration: appConfig.lambdaMaxDuration,
