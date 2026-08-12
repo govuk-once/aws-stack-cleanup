@@ -1,5 +1,5 @@
 {
-  "app": "npx ts-node --prefer-ts-exts cdk/autoStackCleanup-template.ts",
+  "app": "npx tsx cdk/autoStackCleanup-template.ts",
   "requireApproval": "never",
   "watch": {
     "include": ["**"],
