@@ -84,9 +84,10 @@ describe('Stack Manager tests', () => {
 
   test('Should be able to send an email', async () => {
     const stackRport: IStackReport[] = [];
-    const reportDate = new Date(2026, 6, 30);
-    const testDate1 = new Date(2026, 1, 1);
-    const testDate2 = new Date(2022, 1, 1);
+    const reportDate = new Date(Date.parse('2026-06-30T00:00:00.000Z'));
+    const testDate1 = new Date(Date.parse('2026-01-01T00:00:00.000Z'));
+    const testDate2 = new Date(Date.parse('2022-01-01T00:00:00.000Z'));
+
 
     const stackReport1: IStackReport = {
       accountName: 'Account1',
