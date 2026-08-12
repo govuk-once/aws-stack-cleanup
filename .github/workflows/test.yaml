@@ -8,29 +8,17 @@ permissions:
 
 jobs:
   test:
+    name: 🧪 Test Code artifact
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - name: Configure Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # V6.4.0
+      - name: Setup Environment
+        uses: ./.github/workflows/_setup_environment.yml
         with:
-          node-version: 'lts/*'
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 11
+          environment: 'test'
 
-      - name: Configure Aws Credentials
-        uses: aws-actions/configure-aws-credentials@v5
-        with:
-          role-to-assume: ${{ secrets.DEPLOYMENT_ROLE_ARN }}
-          aws-region: eu-west-2
-          role-session-name: GH-Actions-Test-Stack-Cleanup
+      - name: Run Tests
+        run: pnpm run test
 
-      - name: Configure CodeArtifact auth
-        uses: govuk-once/platform-actions/.github/actions/codeartifact-auth@fff749cdfd839413978a28697eea25c8d2f9e1e7 # Arbitrary version at branch
-        with:
-          role-to-assume: ${{ secrets.DEPLOYMENT_ROLE_ARN }}
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm ci
-      - run: pnpm run test

@@ -41,7 +41,6 @@ on:
         options:
           - '11111111111'
           - '33333333333'
-        # ToDo: set account ID based in environment inputted
       aws_region:
         description: 'AWS region'
         required: false
@@ -65,50 +64,17 @@ jobs:
     concurrency:
       group: deploy-${{ inputs.environment }}
     steps:
-
-      - name: Configure Aws Credentials
-        uses: aws-actions/configure-aws-credentials@v5
-        with:
-          role-to-assume: ${{ secrets.DEPLOYMENT_ROLE_ARN }}
-          aws-region: eu-west-2
-          role-session-name: GH-Actions-Deploy-Stack-Cleanup
-
-      - name: Configure CodeArtifact auth
-        uses: govuk-once/platform-actions/.github/actions/codeartifact-auth@fff749cdfd839413978a28697eea25c8d2f9e1e7
-        with:
-          role-to-assume: arn:aws:iam::${{ inputs.aws_account }}:role/infra/GitHubDeploymentRole
-     
       - name: Checkout Repository
         uses: actions/checkout@v5
 
-      - name: Get PNPM Version
-        id: pnpm-version
-        run: echo "pnpm_version=$(jq -r '.packageManager' package.json)" >> $GITHUB_OUTPUT
-
-      - name: Configure CodeArtifact auth
-        uses: govuk-once/platform-actions/.github/actions/codeartifact-auth@ce0d38a2fb22c5f6bd8b8764a1572fbc080a52d1
+      - name: Setup Environment
+        uses: ./.github/workflows/_setup_environment.yml
         with:
-          role-to-assume: arn:aws:iam::${{ inputs.aws_account }}:role/infra/GitHubDeploymentRole
-          
-      - name: Install pnpm
-        run: npm install -g ${{ steps.pnpm-version.outputs.pnpm_version }}
-
-      - name: setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: 'pnpm'
-          
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v5
-        with:
-          role-to-assume: ${{ secrets.DEPLOYMENT_ROLE_ARN }}
-          
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+          environment: ${{ inputs.environment }}
 
       - name: Build Application
         run: pnpm run build
 
       - name: Deploy to Environment
         run: pnpm run deploy:${{ inputs.environment }}
+

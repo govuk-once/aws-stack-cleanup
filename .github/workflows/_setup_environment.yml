@@ -1,0 +1,40 @@
+name: Setup Environment
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: 'Environment name (for session naming)'
+        required: false
+        type: string
+        default: 'ci'
+
+jobs:
+  setup:
+    name: Setup Environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 11
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.DEPLOYMENT_ROLE_ARN }}
+          aws-region: eu-west-2
+          role-session-name: GH-Actions-${{ inputs.environment }}-Setup
+
+      - name: Configure CodeArtifact Auth
+        uses: govuk-once/platform-actions/.github/actions/codeartifact-auth@fff749cdfd839413978a28697eea25c8d2f9e1e7
+        with:
+          role-to-assume: ${{ secrets.DEPLOYMENT_ROLE_ARN }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
