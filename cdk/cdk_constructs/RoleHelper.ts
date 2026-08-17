@@ -28,6 +28,10 @@ export interface IRoleHelperProps {
   queue?: sqs.Queue;
   scope: Construct;
   namingProvider: INamingProvider;
+  condition?: {
+    operator: string,
+    keyValuePair: [string, string]
+  };
 }
 
 export class RoleHelper extends baseRoleHelper {
@@ -116,8 +120,7 @@ export class RoleHelper extends baseRoleHelper {
   ): iam.Role {
     const role = this.findOrCreateRoleTemp(props);
 
-    role.addToPolicy(
-      new iam.PolicyStatement({
+    const policyStatement = new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: [
           'cloudformation:ListStackSets',
@@ -134,8 +137,13 @@ export class RoleHelper extends baseRoleHelper {
           'cloudformation:ListImports',
         ],
         resources: ['*'],
-      }),
-    );
+    });
+
+    if (props.condition) {
+      policyStatement.addCondition(props.condition.operator, props.condition.keyValuePair);
+  }
+
+    role.addToPolicy(policyStatement);
 
     return role;
   }
@@ -162,3 +170,4 @@ export class RoleHelper extends baseRoleHelper {
     );
   }
 }
+

@@ -116,6 +116,10 @@ export class AutoStackCleanupStack extends cdk.Stack {
       operations: [Operations.DELETE],
       scope: this,
       namingProvider: this.namingProvider,
+      condition: {
+        operator: 'StringNotLike',
+        keyValuePair: ['aws:ResourceTag/Retain', 'true'],
+      },
     });
 
     const detectStaleStacksFunction = lambdaFactory.createScheduledLambda(
@@ -170,6 +174,10 @@ export class AutoStackCleanupStack extends cdk.Stack {
       operations: [Operations.READ, Operations.DELETE],
       scope: this,
       namingProvider: this.namingProvider,
+      condition: {
+        operator: 'StringNotLike',
+        keyValuePair: ['aws:ResourceTag/Retain', 'true'],
+      }
     });
 
     lambdaFactory.addEnvironmentVariables(detectStaleStacksFunction.lambda, [
