@@ -88,7 +88,7 @@ export class AutoStackCleanupStack extends cdk.Stack {
         retentionDays: appConfig.logRetentionDuration,
         runtime: cdk.aws_lambda.Runtime.NODEJS_LATEST,
         skipCheckovRule: 'CKV_AWS_59',
-        enableEncryption: false,
+        enableEncryption: true,
         retentionPeriod: cdk.Duration.days(appConfig.retentionPeriod),
         visibiltyTimeout: cdk.Duration.seconds(
           appConfig.visibiltyTimeoutSeconds,
@@ -149,7 +149,7 @@ export class AutoStackCleanupStack extends cdk.Stack {
         topicName: 'stackCleanUp',
         displayName: 'Stack Cleanup Emailer',
         emailAddresses: appConfig.notificationEmails,
-        enableEncryption: false,
+        enableEncryption: true,
         removalPolicy: cdk.RemovalPolicy.DESTROY,
         publisherLambda: detectStaleStacksFunction.lambda,
       },
@@ -231,3 +231,4 @@ export class AutoStackCleanupStack extends cdk.Stack {
     ]);
   }
 }
+
