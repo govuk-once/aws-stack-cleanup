@@ -231,4 +231,3 @@ export class AutoStackCleanupStack extends cdk.Stack {
     ]);
   }
 }
-
