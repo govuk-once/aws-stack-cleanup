@@ -32,7 +32,6 @@ export class Processor {
 
   public async Run(): Promise<void> {
     try {
-
       const stacks = await this.stackManager.getStacks('eu-west2');
       const stacksToProcess: Stack[] = [];
       const stacksNotToProcess: Stack[] = [];
@@ -83,11 +82,8 @@ export class Processor {
         `Error occurred while processing stacks: ${JSON.stringify(error)}`,
       );
     }
-    
-    await this.emailProcessor.buildEmailAndSend(
-      this.stackReports,
-      new Date(),
-    );
+
+    await this.emailProcessor.buildEmailAndSend(this.stackReports, new Date());
   }
 
   protected async sendToBeDeleted(

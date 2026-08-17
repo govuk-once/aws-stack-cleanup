@@ -66,7 +66,7 @@ export class EmailProcessor implements IEmailProcessor {
         '@doNotDeleteReport@',
         this.buildTable(stackReport.stacksNotToDelete),
       )
-      .replace('@deleteReport@', this.buildTable(stackReport.stacksToDelete))
+      .replace('@deleteReport@', this.buildTable(stackReport.stacksToDelete));
     return accountSection;
   }
 

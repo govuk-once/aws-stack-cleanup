@@ -118,7 +118,7 @@ export class AutoStackCleanupStack extends cdk.Stack {
       namingProvider: this.namingProvider,
       condition: {
         operator: 'StringNotLike',
-        value: {'aws:ResourceTag/Retain': 'true'}
+        value: { 'aws:ResourceTag/Retain': 'true' },
       },
     });
 
@@ -176,8 +176,8 @@ export class AutoStackCleanupStack extends cdk.Stack {
       namingProvider: this.namingProvider,
       condition: {
         operator: 'StringNotLike',
-        value: {'aws:ResourceTag/Retain': 'true'}
-      }
+        value: { 'aws:ResourceTag/Retain': 'true' },
+      },
     });
 
     lambdaFactory.addEnvironmentVariables(detectStaleStacksFunction.lambda, [

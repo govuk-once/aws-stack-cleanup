@@ -29,8 +29,8 @@ export interface IRoleHelperProps {
   scope: Construct;
   namingProvider: INamingProvider;
   condition?: {
-    operator: string,
-    value: { [key: string]: string },
+    operator: string;
+    value: { [key: string]: string };
   };
 }
 
@@ -121,27 +121,30 @@ export class RoleHelper extends baseRoleHelper {
     const role = this.findOrCreateRoleTemp(props);
 
     const policyStatement = new iam.PolicyStatement({
-        effect: iam.Effect.ALLOW,
-        actions: [
-          'cloudformation:ListStackSets',
-          'cloudformation:DescribeStackSet',
-          'cloudformation:DeleteStackSet',
-          'cloudformation:ListStackInstances',
-          'cloudformation:DescribeStackInstances',
-          'cloudformation:DeleteStackInstances',
-          'cloudformation:ListStackSetOperations',
-          'cloudformation:ListStacks',
-          'cloudformation:DescribeStacks',
-          'cloudformation:DeleteStack',
-          'cloudformation:ListExports',
-          'cloudformation:ListImports',
-        ],
-        resources: ['*'],
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'cloudformation:ListStackSets',
+        'cloudformation:DescribeStackSet',
+        'cloudformation:DeleteStackSet',
+        'cloudformation:ListStackInstances',
+        'cloudformation:DescribeStackInstances',
+        'cloudformation:DeleteStackInstances',
+        'cloudformation:ListStackSetOperations',
+        'cloudformation:ListStacks',
+        'cloudformation:DescribeStacks',
+        'cloudformation:DeleteStack',
+        'cloudformation:ListExports',
+        'cloudformation:ListImports',
+      ],
+      resources: ['*'],
     });
 
     if (props.condition) {
-      policyStatement.addCondition(props.condition.operator, props.condition.value);
-  }
+      policyStatement.addCondition(
+        props.condition.operator,
+        props.condition.value,
+      );
+    }
 
     role.addToPolicy(policyStatement);
 
@@ -170,4 +173,3 @@ export class RoleHelper extends baseRoleHelper {
     );
   }
 }
-

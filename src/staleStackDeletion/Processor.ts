@@ -19,9 +19,7 @@ export class Processor {
   }
 
   public async deleteStack(message: QueueMessage): Promise<void> {
-    console.info(
-      `Sending command to delete stack:${message.stackName}`,
-    );
+    console.info(`Sending command to delete stack:${message.stackName}`);
 
     const client = this.cloudFormationClientFactory.getClient(message.region);
 

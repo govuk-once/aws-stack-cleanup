@@ -72,4 +72,3 @@ export class SnsProviderFactory extends FactoryBase {
     return { topic, encryptionKey };
   }
 }
-

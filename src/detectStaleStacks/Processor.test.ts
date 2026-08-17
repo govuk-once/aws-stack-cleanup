@@ -6,7 +6,6 @@ import { IEmailProcessor } from './lib/interfaces/IEmailProcessor';
 import { IStackManager } from './lib/interfaces/IStackManager';
 import { IQueueProcessor } from './lib/interfaces/IQueueProcessor';
 
-
 describe('Processor', () => {
   const testDate = new Date(2026, 6, 4);
   const updatedDate = new Date(2021, 1, 9);
