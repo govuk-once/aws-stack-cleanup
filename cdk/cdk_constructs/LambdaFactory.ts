@@ -85,6 +85,7 @@ export class LambdaFactory extends baseLambdaFactory {
         this.kmsKeyFactory.createKey(`${id}-LambdalogKey`, {
           alias: `${props.queueName}-key`,
           description: 'KMS Key to secure the queue',
+          enabedKeyRotation: true,
         }).key;
     }
 
@@ -179,3 +180,4 @@ export class LambdaFactory extends baseLambdaFactory {
     };
   }
 }
+

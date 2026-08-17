@@ -49,6 +49,7 @@ export class SnsProviderFactory extends FactoryBase {
           alias: `${props.topicName}-key`,
           description: `KMS key for topic ${props.topicName}`,
           removalPolicy: props.removalPolicy,
+          enabedKeyRotation: true,
         }).key;
     }
 
@@ -71,3 +72,4 @@ export class SnsProviderFactory extends FactoryBase {
     return { topic, encryptionKey };
   }
 }
+
