@@ -30,7 +30,7 @@ export interface IRoleHelperProps {
   namingProvider: INamingProvider;
   condition?: {
     operator: string,
-    keyValuePair: [string, string]
+    value: { [key: string]: string },
   };
 }
 
@@ -140,7 +140,7 @@ export class RoleHelper extends baseRoleHelper {
     });
 
     if (props.condition) {
-      policyStatement.addCondition(props.condition.operator, props.condition.keyValuePair);
+      policyStatement.addCondition(props.condition.operator, props.condition.value);
   }
 
     role.addToPolicy(policyStatement);

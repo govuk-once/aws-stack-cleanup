@@ -9,8 +9,6 @@ describe('Processor', () => {
   const message: QueueMessage = {
     correlationId: 'correlation-1',
     batchId: 'batch-1',
-    accountId: '123456789012',
-    accountName: 'development',
     region: 'eu-west-2',
     stackName: 'test-stack',
     deleteOrder: 1,

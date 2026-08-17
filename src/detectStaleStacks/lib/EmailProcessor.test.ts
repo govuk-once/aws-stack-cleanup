@@ -14,8 +14,6 @@ describe('Stack Manager tests', () => {
     const testDate2 = new Date(Date.parse('2022-01-01T00:00:00.000Z'));
 
     const stackReport1: IStackReport = {
-      accountName: 'Account1',
-      accountNumber: '1',
       stacksToDelete: [
         {
           StackName: 'delete me stack',
@@ -43,8 +41,6 @@ describe('Stack Manager tests', () => {
     };
 
     const stackReport2: IStackReport = {
-      accountName: 'Account2',
-      accountNumber: '2',
       stacksToDelete: [
         {
           StackName: 'DELETE me stack account 2',
@@ -89,8 +85,6 @@ describe('Stack Manager tests', () => {
     const testDate2 = new Date(Date.parse('2022-01-01T00:00:00.000Z'));
 
     const stackReport1: IStackReport = {
-      accountName: 'Account1',
-      accountNumber: '1',
       stacksToDelete: [
         {
           StackName: 'delete me stack',
@@ -118,8 +112,6 @@ describe('Stack Manager tests', () => {
     };
 
     const stackReport2: IStackReport = {
-      accountName: 'Account2',
-      accountNumber: '2',
       stacksToDelete: [
         {
           StackName: 'DELETE me stack account 2',

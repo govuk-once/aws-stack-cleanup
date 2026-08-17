@@ -118,7 +118,7 @@ export class AutoStackCleanupStack extends cdk.Stack {
       namingProvider: this.namingProvider,
       condition: {
         operator: 'StringNotLike',
-        keyValuePair: ['aws:ResourceTag/Retain', 'true'],
+        value: {'aws:ResourceTag/Retain': 'true'}
       },
     });
 
@@ -176,7 +176,7 @@ export class AutoStackCleanupStack extends cdk.Stack {
       namingProvider: this.namingProvider,
       condition: {
         operator: 'StringNotLike',
-        keyValuePair: ['aws:ResourceTag/Retain', 'true'],
+        value: {'aws:ResourceTag/Retain': 'true'}
       }
     });
 

@@ -2,7 +2,7 @@ export const emailBody =
   '<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>Stack Cleanup Report</title></head><body style="font-family:Arial, sans-serif;"><h1>AWS Stack Cleanup Report @date@</h1>@report@</body></html>';
 
 export const emailAccountSection =
-  '<h2>@accountName@ @accountNumber@</h2><h3>Stacks marked as do not delete</h3>@doNotDeleteReport@<h3>Stacks marked for deletion</h3>@deleteReport@';
+  '<h3>Stacks marked as do not delete</h3>@doNotDeleteReport@<h3>Stacks marked for deletion</h3>@deleteReport@';
 export const emailTableBody =
   '<table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; width: 100%;"><thead><tr><th align="left">Stack Name</th><th align="left">Last Updated</th><th align="left">Stack Status</th></tr></thead><tbody>@rows@</tbody></table>';
 export const emailTableRow =

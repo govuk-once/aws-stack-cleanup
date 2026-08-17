@@ -13,14 +13,14 @@ export class Processor {
       await this.deleteStack(message);
     } catch (error) {
       console.error(
-        `Unable to delete stack ${message.stackName} in account:${message.accountId} ${message.accountName} due to ${JSON.stringify(error)}`,
+        `Unable to delete stack ${message.stackName} due to ${JSON.stringify(error)}`,
       );
     }
   }
 
   public async deleteStack(message: QueueMessage): Promise<void> {
     console.info(
-      `Sending command to delete stack:${message.stackName} from account:${message.accountId}-${message.accountName}`,
+      `Sending command to delete stack:${message.stackName}`,
     );
 
     const client = this.cloudFormationClientFactory.getClient(message.region);

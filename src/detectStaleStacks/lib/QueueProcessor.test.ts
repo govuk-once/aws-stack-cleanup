@@ -13,8 +13,6 @@ describe('Queue Processor tests', () => {
     const message: QueueMessage = {
       correlationId: 'g',
       batchId: '1',
-      accountId: 'account2',
-      accountName: 'rabbit singers',
       region: 'eu-west2',
       stackName: 'Apple pie',
       deleteOrder: 1,
