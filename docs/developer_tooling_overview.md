@@ -62,18 +62,6 @@ This repository includes a standard set of developer tools to ensure consistency
 
 ---
 
-## Cucumber (BDD Testing)
-**What it is:** A Behaviour-Driven Development (BDD) framework using Gherkin syntax.
-
-**Why we use it:**
-- Encourages testing from a user and business perspective
-- Improves collaboration between engineers, product, and QA
-- Complements unit tests with higher-level behavioural coverage
-
-**Docs:** https://cucumber.io/docs
-
----
-
 ## esbuild (Build Tool)
 **What it is:** A highly performant JavaScript/TypeScript bundler.
 

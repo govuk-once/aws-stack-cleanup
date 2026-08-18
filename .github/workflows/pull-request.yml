@@ -9,7 +9,6 @@ on:
 jobs:
   QualityChecks:
     name: 🧪  Quality Checks
-    # needs: GetDependencies
     secrets: inherit
     uses: ./.github/workflows/_quality_checks.yml
 

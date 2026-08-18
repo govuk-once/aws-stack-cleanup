@@ -1,5 +1,9 @@
 name: Build & Deploy
 
+permissions:
+  id-token: write
+  contents: read
+
 on:
   workflow_call:
     inputs:
@@ -37,7 +41,6 @@ on:
         options:
           - '11111111111'
           - '33333333333'
-        # ToDo: set account ID based in environment inputted
       aws_region:
         description: 'AWS region'
         required: false
@@ -64,31 +67,14 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v5
 
-      - name: Get PNPM Version
-        id: pnpm-version
-        run: echo "pnpm_version=$(jq -r '.packageManager' package.json)" >> $GITHUB_OUTPUT
-
-      - name: Install pnpm
-        run: npm install -g ${{ steps.pnpm-version.outputs.pnpm_version }}
-
-      - name: setup node
-        uses: actions/setup-node@v4
+      - name: Setup Environment
+        uses: ./.github/actions/setup-environment
         with:
-          node-version-file: .nvmrc
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+          environment: ${{ inputs.environment }}
+          aws-role-to-assume: ${{ secrets.DEPLOYMENT_ROLE_ARN }}
 
       - name: Build Application
         run: pnpm run build
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v5
-        with:
-          role-to-assume: arn:aws:iam::${{ inputs.aws_account }}:role/infra/GitHubDeploymentRole
-          aws-region: ${{ inputs.aws_region }}
-          role-session-name: ${{ github.event.repository.name }}-${{ inputs.environment }}
 
       - name: Deploy to Environment
         run: pnpm run deploy:${{ inputs.environment }}

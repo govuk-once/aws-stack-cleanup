@@ -20,6 +20,7 @@ It is recommened to move any existing repos to a new one created from this templ
 - a temporary OIDC Stack that creates components to enable deployments from GitHub Actions
 
 ## Local Development Setup:
+aws codeartifact login --tool npm --repository registry-prod-repo --domain registry-prod --domain-owner 904690835784 --region eu-west-2
 
 ### install/setup locally: (to be done once)
 - install nvm (https://github.com/nvm-sh/nvm or brew)
@@ -46,7 +47,7 @@ The tools cover:
 - Infrastructure as Code
 - Dependency management
 - Linting and formatting
-- Testing (unit and BDD)
+- Testing (unit tests)
 - Build tooling
 - Security and secret scanning
 
@@ -105,7 +106,7 @@ These test will check the cloudformation outputted against known bad configurati
 - use eslint and prettier for formatting and linting
 - use precommit for Pre-commit hooks
 - use Vitest for unit test framework
-- use cucumber for BDD testing
+
 - use Esbuild as a build tool
 - use precommit for pre-commit hooks
 - use checkov for scanning iac

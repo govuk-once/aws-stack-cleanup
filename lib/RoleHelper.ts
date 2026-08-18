@@ -1,0 +1,192 @@
+import { Construct } from 'constructs';
+import * as iam from 'aws-cdk-lib/aws-iam';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as s3 from 'aws-cdk-lib/aws-s3';
+import * as kms from 'aws-cdk-lib/aws-kms';
+import { ServiceEnvironmentNamingProvider } from './namingProviders/ServiceEnvironmentNamingProvider.js';
+import { INamingProvider } from './namingProviders/INamingProvider.js';
+
+export enum CrudOperations {
+  CREATE = 'CREATE',
+  READ = 'READ',
+  UPDATE = 'UPDATE',
+  DELETE = 'DELETE',
+}
+
+export interface IRoleHelperProps {
+  id: string;
+  lambda: lambda.IFunction;
+  table?: dynamodb.ITable;
+  bucket?: s3.IBucket;
+  operations: CrudOperations[];
+  role?: iam.Role;
+}
+
+export class RoleHelper {
+  private readonly scope: Construct;
+  private readonly namingProvider: INamingProvider;
+
+  constructor(
+    scope: Construct,
+    serviceName: string,
+    namingProvider?: INamingProvider,
+  ) {
+    this.scope = scope;
+    this.namingProvider =
+      namingProvider ?? new ServiceEnvironmentNamingProvider(serviceName);
+  }
+
+  addDynamoOperationPermissionsToLambda(props: IRoleHelperProps): iam.Role {
+    if (!props.table) throw 'table must be supplied to add s3 role to lambda';
+    const role = this.findOrCreateRole(props);
+    role.addToPolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: this.createDynamodbOperations(props.operations),
+        resources: [props.table.tableArn, `${props.table.tableArn}/index/*`],
+      }),
+    );
+    console.log('looking for database key');
+    const key = this.getTableEncryptionKey(props.table);
+    console.log(`key = ${key}`);
+    if (key) {
+      if (props.operations.find((op) => op === CrudOperations.READ)) {
+        console.log(`adding decryption`);
+        key.grantDecrypt(props.lambda);
+        key.grantGenerateMac(props.lambda);
+      }
+      if (props.operations.find((op) => op === CrudOperations.CREATE)) {
+        console.log(`adding encryption create`);
+        key.grantEncrypt(props.lambda);
+        key.grantDecrypt(props.lambda);
+      }
+      if (props.operations.find((op) => op === CrudOperations.UPDATE)) {
+        console.log(`adding encryption update`);
+        key.grantEncrypt(props.lambda);
+        key.grantDecrypt(props.lambda);
+      }
+      if (props.operations.find((op) => op === CrudOperations.DELETE)) {
+        console.log(`adding encryption update`);
+        key.grantDecrypt(props.lambda);
+      }
+    }
+    return role;
+  }
+
+  addS3OperationPermissionsToLambda(props: IRoleHelperProps): iam.Role {
+    if (!props.bucket) throw 'bucket must be supplied to add s3 role to lambda';
+    const role = this.findOrCreateRole(props);
+    const { bucketActions, objectActions } = this.createS3Operations(
+      props.operations,
+    );
+    if (bucketActions.length > 0) {
+      role.addToPolicy(
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: bucketActions,
+          resources: [props.bucket.bucketArn],
+        }),
+      );
+    }
+    if (objectActions.length > 0) {
+      role.addToPolicy(
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: objectActions,
+          resources: [props.bucket.arnForObjects('*')],
+        }),
+      );
+    }
+    return role;
+  }
+
+  protected findOrCreateRole(props: IRoleHelperProps): iam.Role {
+    if (props.role) return props.role;
+    const roleCandidate = props.lambda.role;
+    if (roleCandidate) return roleCandidate as iam.Role;
+    return new iam.Role(
+      this.scope,
+      this.namingProvider.getResourceId(props.id) ?? 'noId',
+      {
+        assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+        description: `Role assumed by lambda: ${props.lambda.functionName} for resource access`,
+        managedPolicies: [
+          iam.ManagedPolicy.fromAwsManagedPolicyName(
+            'service-role/AWSLambdaBasicExecutionRole',
+          ),
+        ],
+      },
+    );
+  }
+
+  private createDynamodbOperations(operations: CrudOperations[]): string[] {
+    const set = new Set<string>();
+    operations.forEach((operation) => {
+      switch (operation) {
+        case CrudOperations.CREATE:
+          set.add('dynamodb:PutItem');
+          break;
+        case CrudOperations.READ:
+          set.add('dynamodb:BatchGetItem');
+          set.add('dynamodb:GetItem');
+          set.add('dynamodb:Query');
+          set.add('dynamodb:Scan');
+          set.add('dynamodb:DescribeTable');
+          break;
+        case CrudOperations.UPDATE:
+          set.add('dynamodb:UpdateItem');
+          break;
+        case CrudOperations.DELETE:
+          set.add('dynamodb:DeleteItem');
+          break;
+      }
+    });
+    return [...set];
+  }
+
+  private createS3Ops(operations: CrudOperations[]) {
+    const bucketActions = new Set<string>();
+    const objectActions = new Set<string>();
+    operations.forEach((operation) => {
+      switch (operation) {
+        case CrudOperations.CREATE:
+          objectActions.add('s3:PutObject');
+          objectActions.add('s3:AbortMultipartUpload');
+          objectActions.add('s3:ListMultipartUploadParts');
+          break;
+        case CrudOperations.READ:
+          bucketActions.add('s3:ListBucket');
+          objectActions.add('s3:GetObject');
+          break;
+        case CrudOperations.UPDATE:
+          objectActions.add('s3:PutObject');
+          objectActions.add('s3:PutObjectTagging');
+          break;
+        case CrudOperations.DELETE:
+          objectActions.add('s3:DeleteObject');
+          break;
+      }
+    });
+    return {
+      bucketActions: [...bucketActions],
+      objectActions: [...objectActions],
+    };
+  }
+
+  private createS3Operations(operations: CrudOperations[]) {
+    return this.createS3Ops(operations);
+  }
+
+  private getTableEncryptionKey(table: dynamodb.ITable): kms.IKey | undefined {
+    const tableProps = table as unknown as Record<string, unknown>;
+    if (
+      tableProps &&
+      typeof tableProps === 'object' &&
+      'encryptionKey' in tableProps
+    ) {
+      return tableProps.encryptionKey as kms.IKey;
+    }
+    return undefined;
+  }
+}

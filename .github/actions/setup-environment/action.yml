@@ -1,0 +1,40 @@
+name: Setup Environment
+description: 'Sets up Node.js, pnpm, AWS credentials, CodeArtifact auth, and installs dependencies'
+
+inputs:
+  environment:
+    description: 'Environment name (for session naming)'
+    required: false
+    default: 'ci'
+  aws-role-to-assume:
+    description: 'AWS IAM role ARN to assume for credentials and CodeArtifact auth'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version-file: .nvmrc
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v3
+      with:
+        version: 11
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v5
+      with:
+        role-to-assume: ${{ inputs.aws-role-to-assume }}
+        aws-region: eu-west-2
+        role-session-name: GH-Actions-${{ inputs.environment }}-Setup
+
+    - name: Configure CodeArtifact Auth
+      uses: govuk-once/platform-actions/.github/actions/codeartifact-auth@fff749cdfd839413978a28697eea25c8d2f9e1e7
+      with:
+        role-to-assume: ${{ inputs.aws-role-to-assume }}
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+      shell: bash
