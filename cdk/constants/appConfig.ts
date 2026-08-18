@@ -10,7 +10,7 @@ export const appConfig = {
   runTimeHour: 0,
   runTimeMinute: 10,
 
-  notificationEmails: ['phill.armstrong@digital.cabinet-office.gov.uk'],
+  notificationEmails: ['govuk-once-platform-dl@digital.cabinet-office.gov.uk'],
 
   queueName: 'StackCleanup',
   batchSize: 1,

@@ -129,7 +129,7 @@ describe('stale Stack Deletion', () => {
   test('Creates the email subscription', () => {
     template.hasResource('AWS::SNS::Subscription', {
       Properties: {
-        Endpoint: 'phill.armstrong@digital.cabinet-office.gov.uk',
+        Endpoint: 'govuk-once-platform-dl@digital.cabinet-office.gov.uk',
         Protocol: 'email',
         TopicArn: {
           Ref: Match.stringLikeRegexp('stackcleanup'),

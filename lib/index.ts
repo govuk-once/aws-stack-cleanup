@@ -7,5 +7,3 @@ export {
 } from './LambdaFactory.js';
 export { RoleHelper, CrudOperations, IRoleHelperProps } from './RoleHelper.js';
 
-// Note: ServiceParameters, NullNamingProvider, ILambdaRoute are defined but not used in this service.
-// They remain in lib/ for potential future use by consuming services.
