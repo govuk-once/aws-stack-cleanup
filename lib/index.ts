@@ -6,4 +6,3 @@ export {
   IEnvironmentVariable,
 } from './LambdaFactory.js';
 export { RoleHelper, CrudOperations, IRoleHelperProps } from './RoleHelper.js';
-
