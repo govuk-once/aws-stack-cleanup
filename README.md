@@ -106,8 +106,6 @@ These test will check the cloudformation outputted against known bad configurati
 - use eslint and prettier for formatting and linting
 - use precommit for Pre-commit hooks
 - use Vitest for unit test framework
-
-- use Esbuild as a build tool
 - use precommit for pre-commit hooks
 - use checkov for scanning iac
 - use Yelp/detect-secrets for secret scanning on commit

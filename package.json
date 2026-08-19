@@ -45,7 +45,6 @@
     "@vitest/ui": "^4.1.9",
     "aws-cdk": "2.1033.0",
     "concurrently": "^9.2.1",
-    "esbuild": "^0.27.7",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.6",
