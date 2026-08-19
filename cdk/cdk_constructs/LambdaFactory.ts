@@ -96,24 +96,16 @@ export class LambdaFactory {
     namedProps.functionName = `${this.namingProvider.getResourceName(props.name)}`;
     namedProps.timeout = cdk.Duration.seconds(props.duration);
     const logId = this.namingProvider.getResourceId(id) ?? 'not set';
-    const log = new logs.LogGroup(
-      this.scope,
-      `${logId}-LogGroup`,
-      {
-        logGroupName: `/aws/lambda/${this.namingProvider.getResourceName(namedProps.functionName)}`,
-        retention: props.retentionDays
-          ? props.retentionDays
-          : constants.RETENTION_DAYS,
-        encryptionKey: props.key,
-        removalPolicy: cdk.RemovalPolicy.DESTROY,
-      },
-    );
+    const log = new logs.LogGroup(this.scope, `${logId}-LogGroup`, {
+      logGroupName: `/aws/lambda/${this.namingProvider.getResourceName(namedProps.functionName)}`,
+      retention: props.retentionDays
+        ? props.retentionDays
+        : constants.RETENTION_DAYS,
+      encryptionKey: props.key,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
     namedProps.logGroup = log;
-    const newFunction = new lambda.Function(
-      this.scope,
-      logId,
-      namedProps,
-    );
+    const newFunction = new lambda.Function(this.scope, logId, namedProps);
     return newFunction;
   }
 

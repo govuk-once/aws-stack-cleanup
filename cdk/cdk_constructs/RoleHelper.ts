@@ -68,7 +68,9 @@ export class RoleHelper {
     );
   }
 
-  public addDynamoOperationPermissionsToLambda(props: IRoleHelperProps): iam.Role {
+  public addDynamoOperationPermissionsToLambda(
+    props: IRoleHelperProps,
+  ): iam.Role {
     if (!props.table) throw 'table must be supplied to add s3 role to lambda';
     const role = this.findOrCreateRole(props);
     role.addToPolicy(
