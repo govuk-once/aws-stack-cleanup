@@ -15,7 +15,7 @@
     "build": "tsc",
     "watch": "tsc -w",
     "dev": "concurrently -n tsc,cdk -c purple,orange\"tsc -w\" \"cdk watch --hotswap\"",
-    "test": "pnpm run deploy:lambdas && vitest run",
+    "test": "pnpm run build && vitest run",
     "test:unit": "vitest run --coverage src --passWithNoTests",
     "test:cdk": "vitest run --coverage cdk --passWithNoTests",
     "test:watch": "vitest",
@@ -33,8 +33,7 @@
     "deploy:test": "cdk deploy --context environment=test --all --require-approval never",
     "deploy:dev": "cdk deploy --context environment=dev --all --require-approval never",
     "deploy:stag": "cdk deploy --context environment=stag --all --require-approval never",
-    "deploy:prod": "cdk deploy --context environment=prod --all --require-approval never",
-    "deploy:lambdas": "tsx scripts/deploy.ts"
+    "deploy:prod": "cdk deploy --context environment=prod --all --require-approval never"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",

@@ -6,8 +6,8 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { isEphemeralEnvironment } from '../constants/environment';
 import { appConfig, appVariables } from '../constants/appConfig';
 
-import { INamingProvider } from '../../lib/namingProviders/INamingProvider';
-import { ServiceEnvironmentNamingProvider } from '../../lib/namingProviders/ServiceEnvironmentNamingProvider';
+import { INamingProvider } from '../cdk_constructs/namingProviders/INamingProvider';
+import { ServiceEnvironmentNamingProvider } from '../cdk_constructs/namingProviders/ServiceEnvironmentNamingProvider';
 import { LambdaFactory } from '../cdk_constructs/LambdaFactory';
 import { RoleHelper, Operations } from '../cdk_constructs/RoleHelper';
 import { KmsKeyFactory } from '../cdk_constructs/KmsKeyFactory';
