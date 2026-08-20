@@ -59,7 +59,7 @@ export class AutoStackCleanupStack extends cdk.Stack {
     );
 
     const logKey = kmsKeyFactory.createKey('logkey', {
-      alias: 'logkey',
+      alias: `${props.environment}-logkey`,
       enabedKeyRotation: true,
       removalPolicy: isEphemeralEnvironment()
         ? cdk.RemovalPolicy.DESTROY
@@ -239,3 +239,4 @@ export class AutoStackCleanupStack extends cdk.Stack {
     ]);
   }
 }
+
