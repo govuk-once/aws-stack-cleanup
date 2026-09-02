@@ -1,6 +1,6 @@
 import { Construct } from 'constructs';
-import { INamingProvider } from '../../lib/namingProviders/INamingProvider';
-import { FactoryBase } from '../../lib/FactoryBase.js';
+import { INamingProvider } from './namingProviders/INamingProvider';
+import { FactoryBase } from './FactoryBase.js';
 import * as cdk from 'aws-cdk-lib';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as kms from 'aws-cdk-lib/aws-kms';

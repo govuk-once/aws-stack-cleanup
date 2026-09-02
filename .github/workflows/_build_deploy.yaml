@@ -74,7 +74,7 @@ jobs:
           aws-role-to-assume: ${{ secrets.DEPLOYMENT_ROLE_ARN }}
 
       - name: Build Application
-        run: pnpm run build
+        run: pnpm run build:lambdas
 
       - name: Deploy to Environment
         run: pnpm run deploy:${{ inputs.environment }}

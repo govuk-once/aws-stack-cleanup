@@ -62,18 +62,6 @@ This repository includes a standard set of developer tools to ensure consistency
 
 ---
 
-## esbuild (Build Tool)
-**What it is:** A highly performant JavaScript/TypeScript bundler.
-
-**Why we use it:**
-- Extremely fast build times
-- Minimal configuration required
-- Well-suited to serverless and backend services
-
-**Docs:** https://esbuild.github.io/
-
----
-
 ## Checkov (IaC Security Scanning)
 **What it is:** A static analysis tool for Infrastructure as Code.
 
